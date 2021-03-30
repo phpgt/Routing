@@ -1,0 +1,3 @@
+/about-us,/about
+/product?id=1234&title=Something+weird,/product/1234/Something+weird
+/dir/nested/old-link,/other-dir/new-link
