@@ -6,6 +6,8 @@ Planning
 
 Main flow:
 
-+ `Router` object is constructed with a PSR request.
-+ `addHandler()` method assigns a `Match` to a `Handler`, a Match being a dynamic-specificity request matching object, a Handler being like a callback.
-+ `getRoute()` method returns a `Route` object that describes the `Assembly` objects that are needed to build the response.
++ `router.php` defined in project root, but is completely optional due to `router.default.php` being provided by WebEngine.
++ `class Router extends Gt\Routing\Router` has a function `go()` (like most Gt classes) which will execute for every request if it exists.
++ Any other public functions can be added with annotations to match the request.
++ DI passes Router functions any parameters it requires (`Request $request`, for example). 
++ // TODO: How to set the optional view parts and optional logic parts?

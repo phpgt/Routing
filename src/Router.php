@@ -2,6 +2,7 @@
 namespace Gt\Routing;
 
 use Gt\Config\ConfigSection;
+use Psr\Http\Message\RequestInterface;
 use Gt\Http\ResponseStatusException\Redirection\HttpFound;
 use Gt\Http\ResponseStatusException\Redirection\HttpMovedPermanently;
 use Gt\Http\ResponseStatusException\Redirection\HttpMultipleChoices;
@@ -9,21 +10,29 @@ use Gt\Http\ResponseStatusException\Redirection\HttpNotModified;
 use Gt\Http\ResponseStatusException\Redirection\HttpPermanentRedirect;
 use Gt\Http\ResponseStatusException\Redirection\HttpSeeOther;
 use Gt\Http\ResponseStatusException\Redirection\HttpTemporaryRedirect;
-use Negotiation\Negotiator;
-use Psr\Http\Message\RequestInterface;
 
-class Router {
-	private Handler $defaultHandler;
-	/** @var Matcher[] */
-	private array $matcherList;
-	/** @var Handler[] */
-	private array $handlerList;
+abstract class Router {
+	private Assembly $viewAssembly;
+	private Assembly $logicAssembly;
 
 	public function __construct(
-		private ConfigSection $routerConfig
+		protected ConfigSection $routerConfig
 	) {
-		$this->matcherList = [];
-		$this->handlerList = [];
+		$this->viewAssembly = new Assembly();
+		$this->logicAssembly = new Assembly();
+	}
+
+	public function go(RequestInterface $request):void {
+// TODO: Find the matching functions on extended classes via ATTRIBUTES that
+// match the incoming request.
+	}
+
+	public function getViewAssembly():Assembly {
+		return $this->viewAssembly;
+	}
+
+	public function getLogicAssembly():Assembly {
+		return $this->logicAssembly;
 	}
 
 	public function handleRedirects(
@@ -50,66 +59,43 @@ class Router {
 		}
 	}
 
-	public function addDefaultHandler(
-		Matcher $matcher,
-		Handler $handler
+	protected function addToViewAssembly(
+		string $viewPath,
+		string $viewName = null
 	):void {
-		$this->addHandler($matcher, $handler);
-		$this->defaultHandler = $handler;
+
 	}
 
-	public function addHandler(
-		Matcher $matcher,
-		Handler $handler
+	protected function addToLogicAssembly(
+		string $logicPath,
+		string $logicName = null
 	):void {
-		array_push($this->matcherList, $matcher);
-		array_push($this->handlerList, $handler);
+
 	}
 
-	public function getRoute(
-		RequestInterface $request,
-		Negotiator $negotiator = null
-	):Route {
-		$negotiator = $negotiator ?? new Negotiator();
-		$handler = $this->matchHandler($request, $negotiator);
-//		return new Route(
-//			$handler->get
-//		)
+	protected function replaceViewAssembly(
+		string $viewName,
+		string $newViewPath
+	):void {
+
 	}
 
-	private function matchHandler(
-		RequestInterface $request,
-		Negotiator $negotiator
-	):Handler {
-		$acceptHeader = $request->getHeaderLine("accept");
-		$uriPath = $request->getUri()->getPath();
+	protected function replaceLogicAssembly(
+		string $logicName,
+		string $newLogicPath
+	):void {
 
-		foreach($this->matcherList as $i => $matcher) {
-			$mediaType = $negotiator->getBest(
-				$acceptHeader,
-				$matcher->getAccepts()
-			);
-			if(!$mediaType) {
-				continue;
-			}
+	}
 
-			if($uriPathPrefix = $matcher->getUriPathPrefix()) {
-				if(str_starts_with($uriPath, $uriPathPrefix)) {
-					continue;
-				}
-			}
-			if($uriPathSuffix = $matcher->getUriPathSuffix()) {
-				if(!str_ends_with($uriPathPrefix, $uriPathSuffix)) {
-					continue;
-				}
-			}
-			if($callback = $matcher->getCallback()) {
-				if(!call_user_func($callback, $request)) {
-					continue;
-				}
-			}
+	protected function suppressViewAssembly(
+		string $viewName
+	):void {
 
-			return $this->handlerList[$i];
-		}
+	}
+
+	protected function suppressLogicAssembly(
+		string $logicName
+	):void {
+
 	}
 }
