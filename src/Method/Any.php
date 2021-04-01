@@ -1,8 +1,11 @@
 <?php
-namespace Gt\Routing;
+namespace Gt\Routing\Method;
+
+use Attribute;
+use Gt\Routing\Route;
 
 #[Attribute]
-class Any extends Route {
+class Any extends RouteMethod {
 	public function __construct(
 		?string $path = null,
 		?string $name = null,

@@ -5,6 +5,7 @@
 
 	"require": {
 		"php": ">=8.0",
+		"phpgt/typesafegetter": "^1.2.2",
 		"phpgt/config": "^1.1.0",
 		"phpgt/http": "^1.1.3",
 		"psr/http-message": "1.*",

@@ -1,12 +1,11 @@
 <?php
 
+use Gt\Config\ConfigFactory;
 use Gt\Http\Header\RequestHeaders;
 use Gt\Http\Request;
 use Gt\Http\Uri;
 use Gt\Routing\Handler;
 use Gt\Routing\Matcher;
-use Gt\Routing\Router;
-use Gt\Config\ConfigFactory;
 use Gt\Routing\Redirects;
 
 require(__DIR__ . "/../vendor/autoload.php");
@@ -32,11 +31,11 @@ $apiRequest = new Request(
 	])
 );
 $greetRequest = new Request(
-	"GET",
+	"POST",
 	new Uri("/greet/Greg"),
 	new RequestHeaders([
 // An example accept header from Firefox when requesting a normal link:
-		"Accept" => "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+		"Accept" => "text/plain"
 	])
 );
 
@@ -45,7 +44,10 @@ $greetRequest = new Request(
 // set in the config - autoRedirectStatusCode=308
 $routerConfig = $config->getSection("router");
 
-require(__DIR__ . "/project/simple-site/router.php");
+// Set the current directory to the base directory of simple-site project.
+chdir(__DIR__ . "/project/simple-site");
+
+require($routerConfig->getString("app_router_path") ?? "router.php");
 $router = new App\Router($routerConfig);
 
 if(is_file("redirects.csv")) {
@@ -57,10 +59,40 @@ if(is_file("redirects.csv")) {
 	);
 }
 
-$router->go($apiRequest);
+// This part emulates how a web framework will call the files.
 
-foreach($router->getLogicAssembly() as $logicPathname) {
+$router->go($greetRequest);
+echo "Done go", PHP_EOL;
+
+foreach($logicAssembly = $router->getLogicAssembly() as $logicPathname) {
 	echo "Loading logic class: $logicPathname", PHP_EOL;
+	require($logicPathname);
+	$className = $config->getSection("app")->getString("namespace");
+	$className .= "\\";
+	$className .= substr(
+		$logicPathname,
+		strlen("class/")
+	);
+	$className = substr($className, 0, strpos($className, "."));
+	$className = str_replace("/", "\\", $className);
+	$className = "\\$className";
+	$class = new $className();
+	$refGo = new ReflectionMethod($class, "go");
+	$data = $logicAssembly->getData();
+	$injectionParameters = [];
+	foreach($refGo->getParameters() as $param) {
+		$paramName = $param->getName();
+		$paramType = $param->getType()->getName();
+		if(!isset($data[$paramName])) {
+			continue;
+		}
+		if(gettype($data[$paramName]) !== $paramType) {
+			continue;
+		}
+		array_push($injectionParameters, $data[$paramName]);
+	}
+
+	call_user_func([$class, "go"], ...$injectionParameters);
 }
 foreach($router->getViewAssembly() as $viewPathname) {
 	echo "Loading view part: $viewPathname", PHP_EOL;
