@@ -121,18 +121,18 @@ abstract class Router {
 	):?RouterCallback {
 		$negotiator = new Negotiator();
 
-		$bestQuality = 0;
+		$bestQuality = -1;
 		$bestCallback = null;
 		foreach($callbackArray as $callback) {
 			$allAcceptedTypes = $callback->getAcceptedTypes();
 
-			/** @var Accept $currentBest */
+			/** @var Accept|null $currentBest */
 			$currentBest = $negotiator->getBest(
 				$request->getHeaderLine("accept"),
 				$allAcceptedTypes
 			);
 
-			$quality = $currentBest->getQuality();
+			$quality = $currentBest?->getQuality() ?? 0;
 			if($quality <= $bestQuality) {
 				continue;
 			}

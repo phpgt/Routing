@@ -114,6 +114,9 @@ class RouterTest extends TestCase {
 		$request = self::createMock(Request::class);
 		$request->method("getUri")->willReturn($uri);
 		$request->method("getMethod")->willReturn("GET");
+		$request->method("getHeaderLine")
+			->with("accept")
+			->willReturn("text/plain");
 
 		$sut = new class extends Router {
 			#[Any]
@@ -131,6 +134,9 @@ class RouterTest extends TestCase {
 		$request = self::createMock(Request::class);
 		$request->method("getUri")->willReturn($uri);
 		$request->method("getMethod")->willReturn("GET");
+		$request->method("getHeaderLine")
+			->with("accept")
+			->willReturn("text/plain");
 
 		$sut = new class extends Router {
 			#[Any(path: "/nothing")]

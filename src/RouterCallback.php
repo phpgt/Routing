@@ -67,7 +67,7 @@ class RouterCallback {
 	public function getAcceptedTypes():array {
 		$acceptArgument = $this->attribute->getArguments()["accept"] ?? null;
 		if(is_null($acceptArgument)) {
-			return [];
+			return ["*/*"];
 		}
 
 		return explode(",", $acceptArgument);
