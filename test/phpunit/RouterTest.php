@@ -104,11 +104,10 @@ class RouterTest extends TestCase {
 	}
 
 	/**
-	 * Contrary to the above test, we should expect to see an
-	 * HttpNotFound (404) response code if content negotiation passes,
-	 * but there is no route available.
+	 * Here we have a RouterCallback that will match all requests - but it
+	 * will throw an HttpNotFound once invoked.
 	 */
-	public function testRoute_passContentNegotiation_noMatch():void {
+	public function testRoute_matchAny():void {
 		$uri = self::createMock(Uri::class);
 		$uri->method("getPath")->willReturn("/nothing");
 		$request = self::createMock(Request::class);
@@ -122,6 +121,29 @@ class RouterTest extends TestCase {
 			}
 		};
 		self::expectException(HttpNotFound::class);
+		$sut->route($request);
+	}
+
+	public function testRoute_matchPath():void {
+		$uri = self::createMock(Uri::class);
+		$uri->method("getPath")->willReturn("/something");
+		$request = self::createMock(Request::class);
+		$request->method("getUri")->willReturn($uri);
+		$request->method("getMethod")->willReturn("GET");
+
+		$sut = new class extends Router {
+			#[Any(path: "/nothing")]
+			public function thisShouldNotMatch():void {
+				throw new HttpNotFound();
+			}
+
+			#[Any(path: "/something")]
+			public function thisShouldMatch():void {
+				throw new \Exception("Match!");
+			}
+		};
+
+		self::expectExceptionMessage("Match!");
 		$sut->route($request);
 	}
 

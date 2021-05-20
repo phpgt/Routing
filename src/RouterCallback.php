@@ -15,6 +15,10 @@ class RouterCallback {
 	) {
 	}
 
+	public function call(Router $router):void {
+		$this->method->invoke($router);
+	}
+
 	public function isAllowedMethod(string $requestMethod):bool {
 		$args = $this->attribute->getArguments();
 
@@ -33,7 +37,12 @@ class RouterCallback {
 		return in_array($requestMethod, $allowedMethods);
 	}
 
-	public function call(Router $router):void {
-		$this->method->invoke($router);
+	public function matchesPath(string $requestPath):bool {
+		$path = $this->attribute->getArguments()["path"] ?? null;
+		if(is_null($path)) {
+			return true;
+		}
+
+		return $path === $requestPath;
 	}
 }

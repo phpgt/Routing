@@ -61,6 +61,9 @@ abstract class Router {
 			if(!$routerCallback->isAllowedMethod($request->getMethod())) {
 				continue;
 			}
+			if(!$routerCallback->matchesPath($request->getUri()->getPath())) {
+				continue;
+			}
 
 			array_push($validCallbackArray, $routerCallback);
 		}
