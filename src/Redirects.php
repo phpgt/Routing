@@ -4,54 +4,45 @@ namespace Gt\Routing;
 use Iterator;
 use SplFileObject;
 
-/** @implements Iterator<string, string> key=old uri, value=new uri */
 class Redirects implements Iterator {
-	private SplFileObject $file;
-	private string $iteratorKey;
-	private string $iteratorValue;
+	/** @var array<string, string> Key = from url, value = to url */
+	private array $redirectData;
 
-	public function __construct(string $pathname) {
-		$this->file = new SplFileObject($pathname, "r");
-	}
-
-	public function current():string {
-		if(!isset($this->iteratorValue)) {
-			$this->readNextLine();
+	public function __construct(SplFileObject|string $file) {
+		if(is_string($file)) {
+			$file = new SplFileObject($file, "r");
 		}
 
-		return $this->iteratorValue;
-	}
+		$file->rewind();
+		$this->redirectData = [];
 
-	public function next():void {
-		$this->clearIteratorKeyValue();
-		$this->readNextLine();
-	}
+		while(!$file->eof()) {
+			$row = $file->fgetcsv();
+			if(!isset($row[1])) {
+				continue;
+			}
 
-	public function key():string {
-		if(!isset($this->iteratorKey)) {
-			$this->readNextLine();
+			$this->redirectData[$row[0]] = $row[1];
 		}
-
-		return $this->iteratorKey;
-	}
-
-	public function valid():bool {
-		return !$this->file->eof();
 	}
 
 	public function rewind():void {
-		$this->file->rewind();
-		$this->clearIteratorKeyValue();
+		reset($this->redirectData);
 	}
 
-	private function readNextLine():void {
-		$line = $this->file->fgetcsv();
-		$this->iteratorKey = $line[0] ?? "";
-		$this->iteratorValue = $line[1] ?? "";
+	public function valid():bool {
+		return !is_null(key($this->redirectData));
 	}
 
-	private function clearIteratorKeyValue():void {
-		unset($this->iteratorKey);
-		unset($this->iteratorValue);
+	public function current():string {
+		return current($this->redirectData);
+	}
+
+	public function next():void {
+		next($this->redirectData);
+	}
+
+	public function key():string {
+		return key($this->redirectData);
 	}
 }
