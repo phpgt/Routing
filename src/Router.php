@@ -4,6 +4,8 @@ namespace Gt\Routing;
 use Gt\Config\ConfigSection;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotAcceptable;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotFound;
+use Negotiation\Accept;
+use Negotiation\Negotiator;
 use Psr\Http\Message\RequestInterface;
 use Gt\Http\ResponseStatusException\Redirection\HttpFound;
 use Gt\Http\ResponseStatusException\Redirection\HttpMovedPermanently;
@@ -64,20 +66,21 @@ abstract class Router {
 			if(!$routerCallback->matchesPath($request->getUri()->getPath())) {
 				continue;
 			}
+			if(!$routerCallback->matchesAccept($request->getHeaderLine("accept"))) {
+				continue;
+			}
 
 			array_push($validCallbackArray, $routerCallback);
 		}
 
-		$matchingCallbackArray = $this->filterMatchingRouterCallbacks(
+		$bestRouterCallback = $this->negotiateBestCallback(
 			$request,
 			$validCallbackArray
 		);
 
-		if(empty($matchingCallbackArray)) {
+		if(!$bestRouterCallback) {
 			throw new HttpNotAcceptable();
 		}
-
-		$bestRouterCallback = $matchingCallbackArray[0];
 
 // TODO: Call with the DI, so the callback can receive all the required params.
 		$bestRouterCallback->call($this);
@@ -111,14 +114,33 @@ abstract class Router {
 		return $routerCallbackArray;
 	}
 
-	/**
-	 * @param array<RouterCallback> $callbackArray
-	 * @return array<RouterCallback>
-	 */
-	private function filterMatchingRouterCallbacks(
+	/** @param array<RouterCallback> $callbackArray */
+	private function negotiateBestCallback(
 		RequestInterface $request,
 		array $callbackArray
-	):array {
-		return $callbackArray;
+	):?RouterCallback {
+		$negotiator = new Negotiator();
+
+		$bestQuality = 0;
+		$bestCallback = null;
+		foreach($callbackArray as $callback) {
+			$allAcceptedTypes = $callback->getAcceptedTypes();
+
+			/** @var Accept $currentBest */
+			$currentBest = $negotiator->getBest(
+				$request->getHeaderLine("accept"),
+				$allAcceptedTypes
+			);
+
+			$quality = $currentBest->getQuality();
+			if($quality <= $bestQuality) {
+				continue;
+			}
+
+			$bestQuality = $quality;
+			$bestCallback = $callback;
+		}
+
+		return $bestCallback;
 	}
 }

@@ -1,6 +1,7 @@
 <?php
 namespace Gt\Routing;
 
+use Negotiation\Negotiator;
 use ReflectionAttribute;
 use ReflectionMethod;
 use Gt\Routing\Method\HttpRouteMethod;
@@ -20,14 +21,14 @@ class RouterCallback {
 	}
 
 	public function isAllowedMethod(string $requestMethod):bool {
-		$args = $this->attribute->getArguments();
+		$methodsArgument = $this->attribute->getArguments()["methods"] ?? [];
 
 		$allowedMethods = match($this->attribute->getName()) {
 			Any::class => HttpRouteMethod::METHODS_ALL,
 			Get::class => [HttpRouteMethod::METHOD_GET],
 			Post::class => [HttpRouteMethod::METHOD_POST],
 // TODO: The other methods in HTTP.
-			default => $args["methods"] ?? [],
+			default => $methodsArgument,
 		};
 		$allowedMethods = array_map(
 			"strtoupper",
@@ -38,11 +39,37 @@ class RouterCallback {
 	}
 
 	public function matchesPath(string $requestPath):bool {
-		$path = $this->attribute->getArguments()["path"] ?? null;
-		if(is_null($path)) {
+		$pathArgument = $this->attribute->getArguments()["path"] ?? null;
+		if(is_null($pathArgument)) {
 			return true;
 		}
 
-		return $path === $requestPath;
+		return $pathArgument === $requestPath;
+	}
+
+	public function matchesAccept(string $acceptHeader):bool {
+		$acceptArgument = $this->attribute->getArguments()["accept"] ?? null;
+		if(is_null($acceptArgument)) {
+			return true;
+		}
+
+		$acceptedTypes = explode(",", $acceptArgument);
+		$negotiator = new Negotiator();
+		$best = $negotiator->getBest($acceptHeader, $acceptedTypes);
+		if(!$best) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/** @return string[] */
+	public function getAcceptedTypes():array {
+		$acceptArgument = $this->attribute->getArguments()["accept"] ?? null;
+		if(is_null($acceptArgument)) {
+			return [];
+		}
+
+		return explode(",", $acceptArgument);
 	}
 }

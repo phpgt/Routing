@@ -2,6 +2,7 @@
 namespace Gt\Routing\Test;
 
 use Gt\Config\ConfigSection;
+use Gt\Http\Header\RequestHeaders;
 use Gt\Http\Request;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotAcceptable;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotFound;
@@ -143,6 +144,39 @@ class RouterTest extends TestCase {
 			}
 		};
 
+		self::expectExceptionMessage("Match!");
+		$sut->route($request);
+	}
+
+	/**
+	 * Here we have two RouterCallbacks that both match the same path, but
+	 * we will use content negotiation to determine which callback is
+	 * regarded as "best".
+	 */
+	public function testRoute_matchAccept():void {
+		$uri = self::createMock(Uri::class);
+		$uri->method("getPath")->willReturn("/something");
+		$request = self::createMock(Request::class);
+		$request->method("getUri")->willReturn($uri);
+		$request->method("getMethod")->willReturn("GET");
+		$request->method("getHeaderLine")
+			->with("accept")
+			->willReturn("application/xml");
+
+		$sut = new class extends Router {
+// Notice how we're using the default Firefox accept header here, and that it
+// contains "application/xml". It has a quality of 0.9, so should not be
+// preferred over the RouterCallback below.
+			#[Any(path: "/something", accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")]
+			public function thisShouldNotMatch():void {
+				throw new HttpNotFound();
+			}
+
+			#[Any(path: "/something", accept: "application/json,application/xml")]
+			public function thisShouldMatch():void {
+				throw new \Exception("Match!");
+			}
+		};
 		self::expectExceptionMessage("Match!");
 		$sut->route($request);
 	}
