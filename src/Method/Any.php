@@ -2,18 +2,20 @@
 namespace Gt\Routing\Method;
 
 use Attribute;
-use Gt\Routing\Route;
+use Gt\Routing\HttpRoute;
 
 #[Attribute]
-class Any extends RouteMethod {
+class Any extends HttpRouteMethod {
 	public function __construct(
 		?string $path = null,
+		?string $function = null,
 		?string $name = null,
 		?string $accept = null
 	) {
 		parent::__construct(
-			Route::METHODS_ALL,
+			HttpRoute::METHODS_ALL,
 			$path,
+			$function,
 			$name,
 			$accept,
 		);

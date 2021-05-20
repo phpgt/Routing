@@ -2,9 +2,9 @@
 namespace Gt\Routing\Method;
 
 use Attribute;
-use Gt\Routing\Route;
+use Gt\Routing\HttpRoute;
 
 #[Attribute]
-class RouteMethod extends Route {
+class HttpRouteMethod extends HttpRoute {
 
 }

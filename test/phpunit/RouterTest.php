@@ -3,6 +3,8 @@ namespace Gt\Routing\Test;
 
 use Gt\Config\ConfigSection;
 use Gt\Http\Request;
+use Gt\Http\ResponseStatusException\ClientError\HttpNotAcceptable;
+use Gt\Http\ResponseStatusException\ClientError\HttpNotFound;
 use Gt\Http\ResponseStatusException\Redirection\HttpFound;
 use Gt\Http\ResponseStatusException\Redirection\HttpMovedPermanently;
 use Gt\Http\ResponseStatusException\Redirection\HttpMultipleChoices;
@@ -11,6 +13,7 @@ use Gt\Http\ResponseStatusException\Redirection\HttpPermanentRedirect;
 use Gt\Http\ResponseStatusException\Redirection\HttpSeeOther;
 use Gt\Http\ResponseStatusException\Redirection\HttpTemporaryRedirect;
 use Gt\Http\Uri;
+use Gt\Routing\Method\Any;
 use Gt\Routing\Router;
 use Gt\Routing\Redirects;
 use PHPUnit\Framework\TestCase;
@@ -82,6 +85,44 @@ class RouterTest extends TestCase {
 		self::expectException($redirectClass);
 		self::expectExceptionMessage("/new-path");
 		$sut->handleRedirects($redirects, $request);
+	}
+
+	/**
+	 * Usually, the HttpNotAcceptable (406) response code should never be
+	 * seen by the user, because when content negotiation fails, we should
+	 * fall back to a default content-type - but this test is covering the
+	 * occasion when the developer hasn't added ANY routes yet.
+	 */
+	public function testRoute_failContentNegotiation():void {
+		$uri = self::createMock(Uri::class);
+		$uri->method("getPath")->willReturn("/nothing");
+		$request = self::createMock(Request::class);
+		$request->method("getUri")->willReturn($uri);
+		$sut = new class extends Router {};
+		self::expectException(HttpNotAcceptable::class);
+		$sut->route($request);
+	}
+
+	/**
+	 * Contrary to the above test, we should expect to see an
+	 * HttpNotFound (404) response code if content negotiation passes,
+	 * but there is no route available.
+	 */
+	public function testRoute_passContentNegotiation_noMatch():void {
+		$uri = self::createMock(Uri::class);
+		$uri->method("getPath")->willReturn("/nothing");
+		$request = self::createMock(Request::class);
+		$request->method("getUri")->willReturn($uri);
+		$request->method("getMethod")->willReturn("GET");
+
+		$sut = new class extends Router {
+			#[Any]
+			public function exampleRoute():void {
+				throw new HttpNotFound();
+			}
+		};
+		self::expectException(HttpNotFound::class);
+		$sut->route($request);
 	}
 
 	public function data_redirectCode():array {
