@@ -203,6 +203,12 @@ class RouterTest extends TestCase {
 				throw new HttpNotFound();
 			}
 
+			/** @noinspection PhpUnused */
+			#[Any(path: "/something", accept: "fake/nothing")]
+			public function thisShouldNotMatchBecauseItsNothing():void {
+				throw new HttpNotFound();
+			}
+
 			#[Any(path: "/something", accept: "application/json,application/xml")]
 			public function thisShouldMatch():void {
 				throw new Exception("Match!");
