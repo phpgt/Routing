@@ -18,6 +18,8 @@ use Gt\Http\Uri;
 use Gt\Routing\Method\Any;
 use Gt\Routing\Router;
 use Gt\Routing\Redirects;
+use JetBrains\PhpStorm\Deprecated;
+use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 
@@ -116,6 +118,28 @@ class RouterTest extends TestCase {
 				throw new HttpNotFound();
 			}
 
+			#[Any(path: "/something")]
+			public function thisShouldMatch():void {
+				throw new Exception("Match!");
+			}
+		};
+
+		self::expectExceptionMessage("Match!");
+		$sut->route($request);
+	}
+
+	public function testRoute_matchPath_multipleAttributes():void {
+		$uri = self::createMock(Uri::class);
+		$uri->method("getPath")->willReturn("/something");
+		$request = self::createMock(Request::class);
+		$request->method("getUri")->willReturn($uri);
+		$request->method("getMethod")->willReturn("GET");
+		$request->method("getHeaderLine")
+			->with("accept")
+			->willReturn("text/plain");
+
+		$sut = new class extends Router {
+			#[Deprecated(reason: "Just testing", replacement: "Nothing")]
 			#[Any(path: "/something")]
 			public function thisShouldMatch():void {
 				throw new Exception("Match!");
