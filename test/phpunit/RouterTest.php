@@ -1,9 +1,10 @@
 <?php
 namespace Gt\Routing\Test;
 
+use Exception;
 use Gt\Config\ConfigSection;
-use Gt\Http\Header\RequestHeaders;
 use Gt\Http\Request;
+use Gt\Http\ResponseStatusException\AbstractResponseStatusException;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotAcceptable;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotFound;
 use Gt\Http\ResponseStatusException\Redirection\HttpFound;
@@ -54,36 +55,6 @@ class RouterTest extends TestCase {
 
 		$sut = new class extends Router {};
 		self::expectException(HttpPermanentRedirect::class);
-		self::expectExceptionMessage("/new-path");
-		$sut->handleRedirects($redirects, $request);
-	}
-
-	/** @dataProvider data_redirectCode */
-	public function testHandleRedirects_responseCodeFromConfig(
-		int $code,
-		string $redirectClass
-	):void {
-		$config = self::createMock(ConfigSection::class);
-		$config->method("getInt")
-			->with("redirect_response_code")
-			->willReturnOnConsecutiveCalls($code);
-
-		$uri = self::createMock(Uri::class);
-		$uri->method("getPath")->willReturn("/old-path");
-		$request = self::createMock(Request::class);
-		$request->method("getUri")->willReturn($uri);
-
-		$redirects = self::createMock(Redirects::class);
-		$redirects->method("current")
-			->willReturn("/new-path");
-		$redirects->method("key")
-			->willReturn("/old-path");
-		$redirects->method("valid")
-			->willReturnOnConsecutiveCalls(true, false);
-
-		$sut = new class($config) extends Router {};
-
-		self::expectException($redirectClass);
 		self::expectExceptionMessage("/new-path");
 		$sut->handleRedirects($redirects, $request);
 	}
@@ -139,6 +110,7 @@ class RouterTest extends TestCase {
 			->willReturn("text/plain");
 
 		$sut = new class extends Router {
+			/** @noinspection PhpUnused */
 			#[Any(path: "/nothing")]
 			public function thisShouldNotMatch():void {
 				throw new HttpNotFound();
@@ -146,7 +118,7 @@ class RouterTest extends TestCase {
 
 			#[Any(path: "/something")]
 			public function thisShouldMatch():void {
-				throw new \Exception("Match!");
+				throw new Exception("Match!");
 			}
 		};
 
@@ -173,6 +145,7 @@ class RouterTest extends TestCase {
 // Notice how we're using the default Firefox accept header here, and that it
 // contains "application/xml". It has a quality of 0.9, so should not be
 // preferred over the RouterCallback below.
+			/** @noinspection PhpUnused */
 			#[Any(path: "/something", accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8")]
 			public function thisShouldNotMatch():void {
 				throw new HttpNotFound();
@@ -180,11 +153,47 @@ class RouterTest extends TestCase {
 
 			#[Any(path: "/something", accept: "application/json,application/xml")]
 			public function thisShouldMatch():void {
-				throw new \Exception("Match!");
+				throw new Exception("Match!");
+			}
+
+			/** @noinspection PhpUnused */
+			#[Any(path: "/something", accept: "application/xhtml+xml,application/xml;q=0.8")]
+			public function thisShouldNotMatchBecauseLessQuality():void {
+				throw new HttpNotFound();
 			}
 		};
 		self::expectExceptionMessage("Match!");
 		$sut->route($request);
+	}
+
+	/** @dataProvider data_redirectCode */
+	public function testHandleRedirects_responseCodeFromConfig(
+		int $code,
+		string $redirectClass
+	):void {
+		$config = self::createMock(ConfigSection::class);
+		$config->method("getInt")
+			->with("redirect_response_code")
+			->willReturnOnConsecutiveCalls($code);
+
+		$uri = self::createMock(Uri::class);
+		$uri->method("getPath")->willReturn("/old-path");
+		$request = self::createMock(Request::class);
+		$request->method("getUri")->willReturn($uri);
+
+		$redirects = self::createMock(Redirects::class);
+		$redirects->method("current")
+			->willReturn("/new-path");
+		$redirects->method("key")
+			->willReturn("/old-path");
+		$redirects->method("valid")
+			->willReturnOnConsecutiveCalls(true, false);
+
+		$sut = new class($config) extends Router {};
+
+		self::expectException($redirectClass);
+		self::expectExceptionMessage("/new-path");
+		$sut->handleRedirects($redirects, $request);
 	}
 
 	public function data_redirectCode():array {
