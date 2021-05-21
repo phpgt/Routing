@@ -1,6 +1,13 @@
 <?php
 namespace Gt\Routing;
 
+use Gt\Routing\Method\Connect;
+use Gt\Routing\Method\Delete;
+use Gt\Routing\Method\Head;
+use Gt\Routing\Method\Options;
+use Gt\Routing\Method\Patch;
+use Gt\Routing\Method\Put;
+use Gt\Routing\Method\Trace;
 use Negotiation\Negotiator;
 use ReflectionAttribute;
 use ReflectionMethod;
@@ -25,9 +32,15 @@ class RouterCallback {
 
 		$allowedMethods = match($this->attribute->getName()) {
 			Any::class => HttpRouteMethod::METHODS_ALL,
+			Connect::class => [HttpRouteMethod::METHOD_CONNECT],
+			Delete::class => [HttpRouteMethod::METHOD_DELETE],
 			Get::class => [HttpRouteMethod::METHOD_GET],
+			Head::class => [HttpRouteMethod::METHOD_HEAD],
+			Options::class => [HttpRouteMethod::METHOD_OPTIONS],
+			Patch::class => [HttpRouteMethod::METHOD_PATCH],
 			Post::class => [HttpRouteMethod::METHOD_POST],
-// TODO: The other methods in HTTP.
+			Put::class => [HttpRouteMethod::METHOD_PUT],
+			Trace::class => [HttpRouteMethod::METHOD_TRACE],
 			default => $methodsArgument,
 		};
 		$allowedMethods = array_map(

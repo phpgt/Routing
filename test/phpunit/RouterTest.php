@@ -4,6 +4,7 @@ namespace Gt\Routing\Test;
 use Exception;
 use Gt\Config\ConfigSection;
 use Gt\Http\Request;
+use Gt\Http\ResponseStatusException\AbstractResponseStatusException;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotAcceptable;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotFound;
 use Gt\Http\ResponseStatusException\Redirection\HttpFound;
@@ -15,6 +16,8 @@ use Gt\Http\ResponseStatusException\Redirection\HttpSeeOther;
 use Gt\Http\ResponseStatusException\Redirection\HttpTemporaryRedirect;
 use Gt\Http\Uri;
 use Gt\Routing\Method\Any;
+use Gt\Routing\Method\Get;
+use Gt\Routing\Method\Put;
 use Gt\Routing\Router;
 use Gt\Routing\Redirects;
 use JetBrains\PhpStorm\Deprecated;
@@ -96,6 +99,33 @@ class RouterTest extends TestCase {
 			}
 		};
 		self::expectException(HttpNotFound::class);
+		$sut->route($request);
+	}
+
+	public function testRoute_matchHttpMethod():void {
+		$uri = self::createMock(Uri::class);
+		$uri->method("getPath")->willReturn("/something");
+		$request = self::createMock(Request::class);
+		$request->method("getUri")->willReturn($uri);
+		$request->method("getMethod")->willReturn("PUT");
+		$request->method("getHeaderLine")
+			->with("accept")
+			->willReturn("text/plain");
+
+		$sut = new class extends Router {
+			/** @noinspection PhpUnused */
+			#[Get(path: "/something")]
+			public function thisShouldNotMatch():void {
+				throw new HttpNotFound();
+			}
+
+			#[Put(path: "/something")]
+			public function thisShouldMatch():void {
+				throw new Exception("Match!");
+			}
+		};
+
+		self::expectExceptionMessage("Match!");
 		$sut->route($request);
 	}
 
