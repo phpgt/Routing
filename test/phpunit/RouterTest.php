@@ -102,6 +102,31 @@ class RouterTest extends TestCase {
 		$sut->route($request);
 	}
 
+	public function testRoute_matchAny_noExceptionThrown():void {
+		$uri = self::createMock(Uri::class);
+		$uri->method("getPath")->willReturn("/nothing");
+		$request = self::createMock(Request::class);
+		$request->method("getUri")->willReturn($uri);
+		$request->method("getMethod")->willReturn("GET");
+		$request->method("getHeaderLine")
+			->with("accept")
+			->willReturn("text/plain");
+
+		$exception = null;
+		try {
+			$sut = new class extends Router {
+				#[Any]
+				public function exampleRoute():void {
+					// No exception here!
+				}
+			};
+			$sut->route($request);
+		}
+		catch(Throwable $exception) {}
+
+		self::assertNull($exception);
+	}
+
 	public function testRoute_matchHttpMethod():void {
 		$uri = self::createMock(Uri::class);
 		$uri->method("getPath")->willReturn("/something");
