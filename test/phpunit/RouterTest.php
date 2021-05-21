@@ -4,7 +4,6 @@ namespace Gt\Routing\Test;
 use Exception;
 use Gt\Config\ConfigSection;
 use Gt\Http\Request;
-use Gt\Http\ResponseStatusException\AbstractResponseStatusException;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotAcceptable;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotFound;
 use Gt\Http\ResponseStatusException\Redirection\HttpFound;
@@ -19,7 +18,6 @@ use Gt\Routing\Method\Any;
 use Gt\Routing\Router;
 use Gt\Routing\Redirects;
 use JetBrains\PhpStorm\Deprecated;
-use JetBrains\PhpStorm\Pure;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 

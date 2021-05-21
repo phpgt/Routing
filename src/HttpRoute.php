@@ -4,7 +4,7 @@ namespace Gt\Routing;
 use Attribute;
 
 #[Attribute]
-abstract class HttpRoute {
+class HttpRoute {
 	const METHOD_GET = "GET";
 	const METHOD_HEAD = "HEAD";
 	const METHOD_POST = "POST";
@@ -64,6 +64,7 @@ abstract class HttpRoute {
 		self::METHOD_HEAD,
 	];
 
+	/** @param string[] $methods */
 	public function __construct(
 		protected array $methods = self::METHODS_ALL,
 		protected ?string $path = null,

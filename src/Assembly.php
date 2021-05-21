@@ -10,6 +10,7 @@ class Assembly implements Iterator {
 	/** @var array<string, mixed> KVP data to pass to Assembly parts. */
 	private array $data;
 	private int $iteratorIndex;
+	private ?string $functionName;
 
 	public function __construct() {
 		$this->pathList = [];
@@ -31,12 +32,21 @@ class Assembly implements Iterator {
 		unset($this->pathList[$key]);
 	}
 
+	/** @return array<string, mixed> */
 	public function getData():array {
 		return $this->data;
 	}
 
 	public function setData(string $name, mixed $data):void {
 		$this->data[$name] = $data;
+	}
+
+	public function getFunctionName():?string {
+		return $this->functionName ?? null;
+	}
+
+	public function setFunctionName(string $name):void {
+		$this->functionName = $name;
 	}
 
 	public function current():string {

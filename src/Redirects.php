@@ -4,6 +4,7 @@ namespace Gt\Routing;
 use Iterator;
 use SplFileObject;
 
+/** @implements Iterator<string, string> */
 class Redirects implements Iterator {
 	/** @var array<string, string> Key = from url, value = to url */
 	private array $redirectData;
