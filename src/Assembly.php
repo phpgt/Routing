@@ -30,6 +30,7 @@ class Assembly implements Iterator {
 	public function remove(string $path):void {
 		$key = array_search($path, $this->pathList);
 		unset($this->pathList[$key]);
+		$this->pathList = array_values($this->pathList);
 	}
 
 	/** @return array<string, mixed> */
