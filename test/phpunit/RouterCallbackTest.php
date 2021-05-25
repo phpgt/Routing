@@ -1,6 +1,8 @@
 <?php
 namespace Gt\Routing\Test;
 
+use DateTime;
+use DateTimeInterface;
 use Gt\Http\Request;
 use Gt\Routing\HttpRoute;
 use Gt\Routing\Method\Any;
@@ -17,9 +19,11 @@ use Gt\Routing\Method\Trace;
 use Gt\Routing\Router;
 use Gt\Routing\RouterCallback;
 use Gt\ServiceContainer\Container;
+use Gt\ServiceContainer\Injector;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\RequestInterface;
 use ReflectionClass;
+use stdClass;
 
 class RouterCallbackTest extends TestCase {
 	public function testCall():void {
@@ -293,5 +297,48 @@ class RouterCallbackTest extends TestCase {
 				self::assertFalse($sut->isAllowedMethod($httpMethodName));
 			}
 		}
+	}
+
+	/**
+	 * This test mimics the way WebEngine's inbuilt router will call the
+	 * go/do logic functions - these functions are written by the developer,
+	 * so WebEngine will never know beforehand what parameters there are
+	 * going to be.
+	 */
+	public function testCallbackCanCallOtherCallbacksAndInjectServices():void {
+		$logicClass = new class extends StdClass {
+			public array $exampleGoCalls = [];
+
+			public function go(DateTimeInterface $date) {
+				array_push($this->exampleGoCalls, $date);
+			}
+		};
+
+		$routerClass = new class extends Router {
+			#[Any]
+			public function processWebEngineRequest(Injector $injector, StdClass $logic) {
+				$injector->invoke($logic, "go");
+			}
+		};
+
+		$refClass = new ReflectionClass($routerClass);
+		$method = $refClass->getMethod("processWebEngineRequest");
+		$attribute = $method->getAttributes()[0];
+
+// TODO: Add injected parameter into container. Add injector back itno container
+// then somehow make processWebEngineRequest call the go function.
+		$container = new Container();
+		$injector = new Injector($container);
+
+		$now = new DateTime();
+		$container->set(Injector::class, $injector);
+		$container->set(StdClass::class, $logicClass);
+		$container->set(DateTime::class, $now);
+
+		$sut = new RouterCallback($method, $attribute, $container, $injector);
+		$sut->call($routerClass);
+
+		self::assertCount(1, $logicClass->exampleGoCalls);
+		self::assertSame($now, $logicClass->exampleGoCalls[0]);
 	}
 }
