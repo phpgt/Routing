@@ -7,10 +7,7 @@ use Iterator;
 class Assembly implements Iterator {
 	/** @var string[] Ordered list of file paths to load. */
 	private array $pathList;
-	/** @var array<string, mixed> KVP data to pass to Assembly parts. */
-	private array $data;
 	private int $iteratorIndex;
-	private ?string $functionName;
 
 	public function __construct() {
 		$this->pathList = [];
