@@ -11,7 +11,6 @@ class Assembly implements Iterator {
 
 	public function __construct() {
 		$this->pathList = [];
-		$this->data = [];
 		$this->iteratorIndex = 0;
 	}
 
