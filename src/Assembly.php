@@ -33,23 +33,6 @@ class Assembly implements Iterator {
 		$this->pathList = array_values($this->pathList);
 	}
 
-	/** @return array<string, mixed> */
-	public function getData():array {
-		return $this->data;
-	}
-
-	public function setData(string $name, mixed $data):void {
-		$this->data[$name] = $data;
-	}
-
-	public function getFunctionName():?string {
-		return $this->functionName ?? null;
-	}
-
-	public function setFunctionName(string $name):void {
-		$this->functionName = $name;
-	}
-
 	public function current():string {
 		return $this->pathList[$this->iteratorIndex];
 	}

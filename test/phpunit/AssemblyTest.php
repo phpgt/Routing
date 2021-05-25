@@ -48,4 +48,21 @@ class AssemblyTest extends TestCase {
 		foreach($sut as $i => $item) {}
 		self::assertNull($i);
 	}
+
+	public function testIterator():void {
+		$pathList = [
+			"/var/www/dir1",
+			"/var/www/dir2",
+			"/var/www/dir3",
+			"/home/example/dir",
+		];
+		$sut = new Assembly();
+		foreach($pathList as $path) {
+			$sut->add($path);
+		}
+
+		foreach($sut as $i => $path) {
+			self::assertSame($pathList[$i], $path);
+		}
+	}
 }
