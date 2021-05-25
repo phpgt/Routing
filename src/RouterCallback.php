@@ -8,6 +8,8 @@ use Gt\Routing\Method\Options;
 use Gt\Routing\Method\Patch;
 use Gt\Routing\Method\Put;
 use Gt\Routing\Method\Trace;
+use Gt\ServiceContainer\Container;
+use Gt\ServiceContainer\Injector;
 use Negotiation\Negotiator;
 use ReflectionAttribute;
 use ReflectionMethod;
@@ -17,14 +19,21 @@ use Gt\Routing\Method\Get;
 use Gt\Routing\Method\Post;
 
 class RouterCallback {
+	private Container $container;
+	private Injector $injector;
+
 	public function __construct(
 		private ReflectionMethod $method,
-		private ReflectionAttribute $attribute
+		private ReflectionAttribute $attribute,
+		?Container $container = null,
+		?Injector $injector = null,
 	) {
+		$this->container = $container ?? new Container();
+		$this->injector = $injector ?? new Injector($this->container);
 	}
 
 	public function call(Router $router):void {
-		$this->method->invoke($router);
+		$this->injector->invoke($router, $this->method->getName());
 	}
 
 	public function isAllowedMethod(string $requestMethod):bool {

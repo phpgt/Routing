@@ -1,6 +1,7 @@
 <?php
 namespace Gt\Routing\Test;
 
+use Gt\Http\Request;
 use Gt\Routing\HttpRoute;
 use Gt\Routing\Method\Any;
 use Gt\Routing\Method\Connect;
@@ -15,9 +16,10 @@ use Gt\Routing\Method\Put;
 use Gt\Routing\Method\Trace;
 use Gt\Routing\Router;
 use Gt\Routing\RouterCallback;
+use Gt\ServiceContainer\Container;
 use PHPUnit\Framework\TestCase;
+use Psr\Http\Message\RequestInterface;
 use ReflectionClass;
-use ReflectionMethod;
 
 class RouterCallbackTest extends TestCase {
 	public function testCall():void {
@@ -38,6 +40,31 @@ class RouterCallbackTest extends TestCase {
 		$sut = new RouterCallback($method, $attribute);
 		$sut->call($routerClass);
 		self::assertSame(1, $routerClass->exampleMethodCallCount);
+	}
+
+	public function testCall_parameterInjection():void {
+		$routerClass = new class extends Router {
+			public array $exampleMethodCalls = [];
+
+			#[Any]
+			public function exampleMethod(RequestInterface $request) {
+				array_push($this->exampleMethodCalls, $request);
+			}
+		};
+
+		$refClass = new ReflectionClass($routerClass);
+		$method = $refClass->getMethod("exampleMethod");
+		$attribute = $method->getAttributes()[0];
+
+		$request = self::createMock(Request::class);
+		$container = self::createMock(Container::class);
+		$container->method("get")
+			->with(RequestInterface::class)
+			->willReturn($request);
+
+		$sut = new RouterCallback($method, $attribute, $container);
+		$sut->call($routerClass);
+		self::assertCount(1, $routerClass->exampleMethodCalls);
 	}
 
 	public function testIsAllowedMethod_any():void {
