@@ -19,4 +19,5 @@ Main flow:
 TODO List:
 ----------
 
-+ [ ] Perform content negotiation when there are multiple matches. For example: an API route might explicitly accept "application/xml" but the default accept header of web browsers also sends this for page requests, but it gives it a q=0.9 - as long as there is a route with text/html or application/xhtml+xml with a higher q value, it should be preferred.
++ [x] Perform content negotiation when there are multiple matches. For example: an API route might explicitly accept "application/xml" but the default accept header of web browsers also sends this for page requests, but it gives it a q=0.9 - as long as there is a route with text/html or application/xhtml+xml with a higher q value, it should be preferred.
++ [ ] Take a RequestInterface and a project directory, and construct the appropriate Assembly objects - matching the URL path to directory paths, extracting dynamic paths where appropriate.
