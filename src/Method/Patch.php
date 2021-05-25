@@ -4,6 +4,7 @@ namespace Gt\Routing\Method;
 use Attribute;
 use Gt\Routing\HttpRoute;
 
+/** @codeCoverageIgnore  */
 #[Attribute]
 class Patch extends HttpRouteMethod {
 	public function __construct(

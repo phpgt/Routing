@@ -4,6 +4,7 @@ namespace Gt\Routing\Method;
 use Attribute;
 use Gt\Routing\HttpRoute;
 
+/** @codeCoverageIgnore  */
 #[Attribute]
 class Any extends HttpRouteMethod {
 	public function __construct(

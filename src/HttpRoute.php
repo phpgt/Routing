@@ -3,6 +3,7 @@ namespace Gt\Routing;
 
 use Attribute;
 
+/** @codeCoverageIgnore  */
 #[Attribute]
 class HttpRoute {
 	const METHOD_GET = "GET";
