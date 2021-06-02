@@ -5,6 +5,9 @@ use Iterator;
 
 /** @implements Iterator<int, string> */
 class Assembly implements Iterator {
+	const TYPE_LOGIC = "logic";
+	const TYPE_VIEW = "view";
+
 	/** @var string[] Ordered list of file paths to load. */
 	private array $pathList;
 	private int $iteratorIndex;
