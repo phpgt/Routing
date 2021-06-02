@@ -61,7 +61,9 @@ $container = new \Gt\ServiceContainer\Container();
 $container->set($pageRequest);
 
 $pathMatcher = new \Gt\Routing\Path\PathMatcher();
-//$pathMatcher
+$pathMatcher->addFilter(function(string $filePath, string $uriPath):bool {
+	var_dump($uriPath);
+});
 $container->set($pathMatcher);
 $injector = new \Gt\ServiceContainer\Injector($container);
 
