@@ -5,28 +5,39 @@ use Gt\Http\Request;
 use Gt\Routing\Method\Any;
 use Gt\Routing\Method\Get;
 use Gt\Routing\Method\Post;
-use Gt\Routing\DynamicPath;
-use Gt\Routing\Router as BaseRouter;
+use Gt\Routing\BaseRouter;
+use Gt\Routing\Path\PathMatcher;
+use Gt\Routing\Path\DynamicPath;
 
-class Router extends BaseRouter {
+class AppRouter extends BaseRouter {
 	#[Any(name: "api-route", accept: "application/json,application/xml")]
-	public function api(Request $request):void {
-		foreach($this->findMatchingFilePaths(
+	public function api(Request $request, PathMatcher $pathMatcher):void {
+		echo "API ROUTE CALLBACK", PHP_EOL;
+		foreach($pathMatcher->findForUriPath(
+			$request->getUri()->getPath(),
 			"api",
-			"php",
-			$request->getUri()->getPath()
+			"php"
 		) as $logicName => $path) {
 			$this->addToLogicAssembly($path, $logicName);
 		}
 	}
 
 	#[Get(name: "page-route", accept: "text/html,application/xhtml+xml")]
-	public function page(Request $request):void {
+	public function page(PathMatcher $pathMatcher, Request $request):void {
+		echo "PAGE ROUTE CALLBACK", PHP_EOL;
 		// TODO: add logic and view assembly in the api directory
 		// (configured from $this->routerConfig)
+
+		foreach($pathMatcher->findForUriPath(
+			$request->getUri()->getPath(),
+			"page",
+			"php"
+		) as $logicName => $path) {
+			$this->addToLogicAssembly($path, $logicName);
+		}
 	}
 
-	#[Post(path: "/greet/@name", accept: "text/plain")]
+	#[Post(path: "/greet/@name", function: "greet", accept: "text/plain")]
 	public function dynamicText(
 		DynamicPath $dynamicPath
 	):void {
@@ -35,14 +46,5 @@ class Router extends BaseRouter {
 			"name",
 			$dynamicPath->getString("name")
 		);
-	}
-
-	/** @return string[] Ordered list of file paths */
-	private function findMatchingFilePaths(
-		string $baseDir,
-		string $extension,
-		string $uriPath
-	):array {
-
 	}
 }
