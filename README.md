@@ -1,6 +1,34 @@
 Routes HTTP requests to logic and view files.
 =============================================
 
+As HTTP requests are received by an application, the appropriate logic methods need to be called, along with certain files being loaded to construct the correct view for the request. This is done by taking the HTTP request and _routing_ it to the matching areas of the application source code.
+
+This repository breaks down the concept of routing into three areas of responsibility:
+
+1. Matching an HTTP request to an appropriate callback function.
+2. Creating an Assembly of logic and view files that match the request.
+3. Processing the Assemblies, in order to create the correct HTTP response.
+
+When referring to Requests within this repository, we are always referring to a [PSR-7 HTTP Message][psr-7].
+
+***
+
+<a href="https://github.com/PhpGt/Routing/actions" target="_blank">
+	<img src="https://badge.status.php.gt/routing-build.svg" alt="Build status" />
+</a>
+<a href="https://scrutinizer-ci.com/g/PhpGt/Routing" target="_blank">
+	<img src="https://badge.status.php.gt/routing-quality.svg" alt="Code quality" />
+</a>
+<a href="https://scrutinizer-ci.com/g/PhpGt/Routing" target="_blank">
+	<img src="https://badge.status.php.gt/routing-coverage.svg" alt="Code coverage" />
+</a>
+<a href="https://packagist.org/packages/PhpGt/Routing" target="_blank">
+	<img src="https://badge.status.php.gt/routing-version.svg" alt="Current version" />
+</a>
+<a href="http://www.php.gt/routing" target="_blank">
+	<img src="https://badge.status.php.gt/routing-docs.svg" alt="PHP.G/Routing documentation" />
+</a>
+
 Planning
 --------
 
@@ -21,3 +49,5 @@ TODO List:
 
 + [x] Perform content negotiation when there are multiple matches. For example: an API route might explicitly accept "application/xml" but the default accept header of web browsers also sends this for page requests, but it gives it a q=0.9 - as long as there is a route with text/html or application/xhtml+xml with a higher q value, it should be preferred.
 + [ ] Take a RequestInterface and a project directory, and construct the appropriate Assembly objects - matching the URL path to directory paths, extracting dynamic paths where appropriate.
+
+[psr-7]: https://www.php-fig.org/psr/psr-7/
