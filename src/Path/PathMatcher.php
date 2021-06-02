@@ -2,15 +2,12 @@
 namespace Gt\Routing\Path;
 
 class PathMatcher {
-	/** @return array<UNKNOWN, string>
-	 */
+	/** @return array<UNKNOWN, string> */
 	public function findForUriPath(
 		string $uriPath,
-		string $subPath,
+		string $dirPath,
 		string...$extensions
 	):array {
-		$matches = [];
-
-		return $matches;
+		return [];
 	}
 }
