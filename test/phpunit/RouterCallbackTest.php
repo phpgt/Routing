@@ -16,7 +16,7 @@ use Gt\Routing\Method\Patch;
 use Gt\Routing\Method\Post;
 use Gt\Routing\Method\Put;
 use Gt\Routing\Method\Trace;
-use Gt\Routing\Router;
+use Gt\Routing\BaseRouter;
 use Gt\Routing\RouterCallback;
 use Gt\ServiceContainer\Container;
 use Gt\ServiceContainer\Injector;
@@ -27,7 +27,7 @@ use stdClass;
 
 class RouterCallbackTest extends TestCase {
 	public function testCall():void {
-		$routerClass = new class extends Router {
+		$routerClass = new class extends BaseRouter {
 			public int $exampleMethodCallCount = 0;
 
 			/** @noinspection PhpUnused */
@@ -47,7 +47,7 @@ class RouterCallbackTest extends TestCase {
 	}
 
 	public function testCall_parameterInjection():void {
-		$routerClass = new class extends Router {
+		$routerClass = new class extends BaseRouter {
 			public array $exampleMethodCalls = [];
 
 			#[Any]
@@ -72,7 +72,7 @@ class RouterCallbackTest extends TestCase {
 	}
 
 	public function testIsAllowedMethod_any():void {
-		$routerClass = new class extends Router {
+		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Any]
 			public function example() {}
@@ -88,7 +88,7 @@ class RouterCallbackTest extends TestCase {
 	}
 
 	public function testIsAllowedMethod_methodsListed():void {
-		$routerClass = new class extends Router {
+		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[HttpRoute(methods: ["GET", "HEAD", "OPTIONS"])]
 			public function example() {}
@@ -111,7 +111,7 @@ class RouterCallbackTest extends TestCase {
 	}
 
 	public function testIsAllowedMethod_connect():void {
-		$routerClass = new class extends Router {
+		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Connect]
 			public function example() {}
@@ -132,7 +132,7 @@ class RouterCallbackTest extends TestCase {
 	}
 
 	public function testIsAllowedMethod_delete():void {
-		$routerClass = new class extends Router {
+		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Delete]
 			public function example() {}
@@ -153,7 +153,7 @@ class RouterCallbackTest extends TestCase {
 	}
 
 	public function testIsAllowedMethod_get():void {
-		$routerClass = new class extends Router {
+		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Get]
 			public function example() {}
@@ -174,7 +174,7 @@ class RouterCallbackTest extends TestCase {
 	}
 
 	public function testIsAllowedMethod_head():void {
-		$routerClass = new class extends Router {
+		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Head]
 			public function example() {}
@@ -195,7 +195,7 @@ class RouterCallbackTest extends TestCase {
 	}
 
 	public function testIsAllowedMethod_options():void {
-		$routerClass = new class extends Router {
+		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Options]
 			public function example() {}
@@ -216,7 +216,7 @@ class RouterCallbackTest extends TestCase {
 	}
 
 	public function testIsAllowedMethod_patch():void {
-		$routerClass = new class extends Router {
+		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Patch]
 			public function example() {}
@@ -237,7 +237,7 @@ class RouterCallbackTest extends TestCase {
 	}
 
 	public function testIsAllowedMethod_post():void {
-		$routerClass = new class extends Router {
+		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Post]
 			public function example() {}
@@ -258,7 +258,7 @@ class RouterCallbackTest extends TestCase {
 	}
 
 	public function testIsAllowedMethod_put():void {
-		$routerClass = new class extends Router {
+		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Put]
 			public function example() {}
@@ -279,7 +279,7 @@ class RouterCallbackTest extends TestCase {
 	}
 
 	public function testIsAllowedMethod_trace():void {
-		$routerClass = new class extends Router {
+		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Trace]
 			public function example() {}
@@ -314,7 +314,7 @@ class RouterCallbackTest extends TestCase {
 			}
 		};
 
-		$routerClass = new class extends Router {
+		$routerClass = new class extends BaseRouter {
 			#[Any]
 			public function processWebEngineRequest(Injector $injector, StdClass $logic) {
 				$injector->invoke($logic, "go");

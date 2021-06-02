@@ -32,7 +32,7 @@ class RouterCallback {
 		$this->injector = $injector ?? new Injector($this->container);
 	}
 
-	public function call(Router $router):void {
+	public function call(BaseRouter $router):void {
 		$this->injector->invoke($router, $this->method->getName());
 	}
 

@@ -16,7 +16,7 @@ use Gt\Http\ResponseStatusException\Redirection\HttpSeeOther;
 use Gt\Http\ResponseStatusException\Redirection\HttpTemporaryRedirect;
 use ReflectionClass;
 
-abstract class Router {
+abstract class BaseRouter {
 	private Assembly $viewAssembly;
 	private Assembly $logicAssembly;
 
@@ -84,6 +84,44 @@ abstract class Router {
 
 // TODO: Call with the DI, so the callback can receive all the required params.
 		$bestRouterCallback->call($this);
+	}
+
+	public function getLogicAssembly():Assembly {
+
+	}
+
+	public function getViewAssembly():Assembly {
+
+	}
+
+	protected function addToLogicAssembly(
+		string $relativePath,
+		?string $logicName = null
+	):void {
+		$this->addToAssembly(
+			Assembly::TYPE_LOGIC,
+			$relativePath,
+			$logicName
+		);
+	}
+
+	protected function addToViewAssembly(
+		string $relativePath,
+		?string $viewName = null
+	):void {
+		$this->addToAssembly(
+			Assembly::TYPE_VIEW,
+			$relativePath,
+			$viewName
+		);
+	}
+
+	private function addToAssembly(
+		string $type,
+		string $path,
+		?string $name
+	):void {
+
 	}
 
 	/**

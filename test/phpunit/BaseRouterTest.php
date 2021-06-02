@@ -18,7 +18,7 @@ use Gt\Http\Uri;
 use Gt\Routing\Method\Any;
 use Gt\Routing\Method\Get;
 use Gt\Routing\Method\Put;
-use Gt\Routing\Router;
+use Gt\Routing\BaseRouter;
 use Gt\Routing\Redirects;
 use JetBrains\PhpStorm\Deprecated;
 use PHPUnit\Framework\TestCase;
@@ -32,7 +32,7 @@ class RouterTest extends TestCase {
 		$request->method("getUri")->willReturn($uri);
 
 		$redirects = self::createMock(Redirects::class);
-		$sut = new class extends Router {};
+		$sut = new class extends BaseRouter {};
 
 		$exception = null;
 		try {
@@ -56,7 +56,7 @@ class RouterTest extends TestCase {
 		$redirects->method("valid")
 			->willReturnOnConsecutiveCalls(true, false);
 
-		$sut = new class extends Router {};
+		$sut = new class extends BaseRouter {};
 		self::expectException(HttpPermanentRedirect::class);
 		self::expectExceptionMessage("/new-path");
 		$sut->handleRedirects($redirects, $request);
@@ -73,7 +73,7 @@ class RouterTest extends TestCase {
 		$uri->method("getPath")->willReturn("/nothing");
 		$request = self::createMock(Request::class);
 		$request->method("getUri")->willReturn($uri);
-		$sut = new class extends Router {};
+		$sut = new class extends BaseRouter {};
 		self::expectException(HttpNotAcceptable::class);
 		$sut->route($request);
 	}
@@ -92,7 +92,7 @@ class RouterTest extends TestCase {
 			->with("accept")
 			->willReturn("text/plain");
 
-		$sut = new class extends Router {
+		$sut = new class extends BaseRouter {
 			#[Any]
 			public function exampleRoute():void {
 				throw new HttpNotFound();
@@ -114,7 +114,7 @@ class RouterTest extends TestCase {
 
 		$exception = null;
 		try {
-			$sut = new class extends Router {
+			$sut = new class extends BaseRouter {
 				#[Any]
 				public function exampleRoute():void {
 					// No exception here!
@@ -137,7 +137,7 @@ class RouterTest extends TestCase {
 			->with("accept")
 			->willReturn("text/plain");
 
-		$sut = new class extends Router {
+		$sut = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Get(path: "/something")]
 			public function thisShouldNotMatch():void {
@@ -164,7 +164,7 @@ class RouterTest extends TestCase {
 			->with("accept")
 			->willReturn("text/plain");
 
-		$sut = new class extends Router {
+		$sut = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Any(path: "/nothing")]
 			public function thisShouldNotMatch():void {
@@ -191,7 +191,7 @@ class RouterTest extends TestCase {
 			->with("accept")
 			->willReturn("text/plain");
 
-		$sut = new class extends Router {
+		$sut = new class extends BaseRouter {
 			#[Deprecated(reason: "Just testing", replacement: "Nothing")]
 			#[Any(path: "/something")]
 			public function thisShouldMatch():void {
@@ -218,7 +218,7 @@ class RouterTest extends TestCase {
 			->with("accept")
 			->willReturn("application/xml");
 
-		$sut = new class extends Router {
+		$sut = new class extends BaseRouter {
 // Notice how we're using the default Firefox accept header here, and that it
 // contains "application/xml". It has a quality of 0.9, so should not be
 // preferred over the RouterCallback below.
@@ -272,7 +272,7 @@ class RouterTest extends TestCase {
 		$redirects->method("valid")
 			->willReturnOnConsecutiveCalls(true, false);
 
-		$sut = new class($config) extends Router {};
+		$sut = new class($config) extends BaseRouter {};
 
 		self::expectException($redirectClass);
 		self::expectExceptionMessage("/new-path");
