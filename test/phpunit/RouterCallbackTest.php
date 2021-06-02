@@ -32,7 +32,7 @@ class RouterCallbackTest extends TestCase {
 
 			/** @noinspection PhpUnused */
 			#[Any]
-			public function exampleMethodWithAttribute() {
+			public function exampleMethodWithAttribute():void {
 				$this->exampleMethodCallCount++;
 			}
 		};
@@ -48,10 +48,11 @@ class RouterCallbackTest extends TestCase {
 
 	public function testCall_parameterInjection():void {
 		$routerClass = new class extends BaseRouter {
+			/** @var array<int, RequestInterface> */
 			public array $exampleMethodCalls = [];
 
 			#[Any]
-			public function exampleMethod(RequestInterface $request) {
+			public function exampleMethod(RequestInterface $request):void {
 				array_push($this->exampleMethodCalls, $request);
 			}
 		};
@@ -75,7 +76,7 @@ class RouterCallbackTest extends TestCase {
 		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Any]
-			public function example() {}
+			public function example():void {}
 		};
 		$refClass = new ReflectionClass($routerClass);
 		$method = $refClass->getMethod("example");
@@ -91,7 +92,7 @@ class RouterCallbackTest extends TestCase {
 		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[HttpRoute(methods: ["GET", "HEAD", "OPTIONS"])]
-			public function example() {}
+			public function example():void {}
 		};
 		$refClass = new ReflectionClass($routerClass);
 		$method = $refClass->getMethod("example");
@@ -114,7 +115,7 @@ class RouterCallbackTest extends TestCase {
 		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Connect]
-			public function example() {}
+			public function example():void {}
 		};
 		$refClass = new ReflectionClass($routerClass);
 		$method = $refClass->getMethod("example");
@@ -135,7 +136,7 @@ class RouterCallbackTest extends TestCase {
 		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Delete]
-			public function example() {}
+			public function example():void {}
 		};
 		$refClass = new ReflectionClass($routerClass);
 		$method = $refClass->getMethod("example");
@@ -156,7 +157,7 @@ class RouterCallbackTest extends TestCase {
 		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Get]
-			public function example() {}
+			public function example():void {}
 		};
 		$refClass = new ReflectionClass($routerClass);
 		$method = $refClass->getMethod("example");
@@ -177,7 +178,7 @@ class RouterCallbackTest extends TestCase {
 		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Head]
-			public function example() {}
+			public function example():void {}
 		};
 		$refClass = new ReflectionClass($routerClass);
 		$method = $refClass->getMethod("example");
@@ -198,7 +199,7 @@ class RouterCallbackTest extends TestCase {
 		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Options]
-			public function example() {}
+			public function example():void {}
 		};
 		$refClass = new ReflectionClass($routerClass);
 		$method = $refClass->getMethod("example");
@@ -219,7 +220,7 @@ class RouterCallbackTest extends TestCase {
 		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Patch]
-			public function example() {}
+			public function example():void {}
 		};
 		$refClass = new ReflectionClass($routerClass);
 		$method = $refClass->getMethod("example");
@@ -240,7 +241,7 @@ class RouterCallbackTest extends TestCase {
 		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Post]
-			public function example() {}
+			public function example():void {}
 		};
 		$refClass = new ReflectionClass($routerClass);
 		$method = $refClass->getMethod("example");
@@ -261,7 +262,7 @@ class RouterCallbackTest extends TestCase {
 		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Put]
-			public function example() {}
+			public function example():void {}
 		};
 		$refClass = new ReflectionClass($routerClass);
 		$method = $refClass->getMethod("example");
@@ -282,7 +283,7 @@ class RouterCallbackTest extends TestCase {
 		$routerClass = new class extends BaseRouter {
 			/** @noinspection PhpUnused */
 			#[Trace]
-			public function example() {}
+			public function example():void {}
 		};
 		$refClass = new ReflectionClass($routerClass);
 		$method = $refClass->getMethod("example");
@@ -307,16 +308,20 @@ class RouterCallbackTest extends TestCase {
 	 */
 	public function testCallbackCanCallOtherCallbacksAndInjectServices():void {
 		$logicClass = new class extends StdClass {
+			/** @var array<int, DateTimeInterface> */
 			public array $exampleGoCalls = [];
 
-			public function go(DateTimeInterface $date) {
+			public function go(DateTimeInterface $date):void {
 				array_push($this->exampleGoCalls, $date);
 			}
 		};
 
 		$routerClass = new class extends BaseRouter {
 			#[Any]
-			public function processWebEngineRequest(Injector $injector, StdClass $logic) {
+			public function processWebEngineRequest(
+				Injector $injector,
+				StdClass $logic
+			):void {
 				$injector->invoke($logic, "go");
 			}
 		};
@@ -325,15 +330,15 @@ class RouterCallbackTest extends TestCase {
 		$method = $refClass->getMethod("processWebEngineRequest");
 		$attribute = $method->getAttributes()[0];
 
-// TODO: Add injected parameter into container. Add injector back itno container
+// TODO: Add injected parameter into container. Add injector back into container
 // then somehow make processWebEngineRequest call the go function.
 		$container = new Container();
 		$injector = new Injector($container);
 
 		$now = new DateTime();
-		$container->set(Injector::class, $injector);
-		$container->set(StdClass::class, $logicClass);
-		$container->set(DateTime::class, $now);
+		$container->set($injector);
+		$container->set($logicClass);
+		$container->set($now);
 
 		$sut = new RouterCallback($method, $attribute, $container, $injector);
 		$sut->call($routerClass);

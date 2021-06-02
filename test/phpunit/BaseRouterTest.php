@@ -24,7 +24,7 @@ use JetBrains\PhpStorm\Deprecated;
 use PHPUnit\Framework\TestCase;
 use Throwable;
 
-class RouterTest extends TestCase {
+class BaseRouterTest extends TestCase {
 	public function testHandleRedirects_none():void {
 		$uri = self::createMock(Uri::class);
 		$uri->method("getPath")->willReturn("/");
