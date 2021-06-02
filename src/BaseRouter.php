@@ -3,9 +3,9 @@ namespace Gt\Routing;
 
 use Gt\Config\ConfigSection;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotAcceptable;
-use Gt\Http\ResponseStatusException\ClientError\HttpNotFound;
+use Gt\ServiceContainer\Container;
+use Gt\ServiceContainer\Injector;
 use Negotiation\Accept;
-use Negotiation\Negotiator;
 use Psr\Http\Message\RequestInterface;
 use Gt\Http\ResponseStatusException\Redirection\HttpFound;
 use Gt\Http\ResponseStatusException\Redirection\HttpMovedPermanently;
@@ -19,6 +19,8 @@ use ReflectionClass;
 abstract class BaseRouter {
 	private Assembly $viewAssembly;
 	private Assembly $logicAssembly;
+	private Container $container;
+	private Injector $injector;
 
 	public function __construct(
 		protected ?ConfigSection $routerConfig = null,
@@ -27,6 +29,14 @@ abstract class BaseRouter {
 	) {
 		$this->viewAssembly = $viewAssembly ?? new Assembly();
 		$this->logicAssembly = $logicAssembly ?? new Assembly();
+	}
+
+	public function setContainer(Container $container):void {
+		$this->container = $container;
+	}
+
+	public function setInjector(Injector $injector):void {
+		$this->injector = $injector;
 	}
 
 	public function handleRedirects(
@@ -87,11 +97,11 @@ abstract class BaseRouter {
 	}
 
 	public function getLogicAssembly():Assembly {
-
+		return $this->logicAssembly;
 	}
 
 	public function getViewAssembly():Assembly {
-
+		return $this->viewAssembly;
 	}
 
 	protected function addToLogicAssembly(
@@ -144,7 +154,12 @@ abstract class BaseRouter {
 
 				array_push(
 					$routerCallbackArray,
-					new RouterCallback($method, $attribute)
+					new RouterCallback(
+						$method,
+						$attribute,
+						$this->container ?? null,
+						$this->injector ?? null
+					)
 				);
 			}
 		}
@@ -157,20 +172,15 @@ abstract class BaseRouter {
 		RequestInterface $request,
 		array $callbackArray
 	):?RouterCallback {
-		$negotiator = new Negotiator();
-
 		$bestQuality = -1;
 		$bestCallback = null;
 		foreach($callbackArray as $callback) {
-			$allAcceptedTypes = $callback->getAcceptedTypes();
-
-			/** @var Accept|null $currentBest */
-			$currentBest = $negotiator->getBest(
-				$request->getHeaderLine("accept"),
-				$allAcceptedTypes
+			/** @var Accept|null $best */
+			$best = $callback->getBestNegotiation(
+				$request->getHeaderLine("accept")
 			);
 
-			$quality = $currentBest?->getQuality() ?? 0;
+			$quality = $best?->getQuality() ?? 0;
 			if($quality <= $bestQuality) {
 				continue;
 			}

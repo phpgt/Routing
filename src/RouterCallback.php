@@ -10,6 +10,7 @@ use Gt\Routing\Method\Put;
 use Gt\Routing\Method\Trace;
 use Gt\ServiceContainer\Container;
 use Gt\ServiceContainer\Injector;
+use Negotiation\Accept;
 use Negotiation\Negotiator;
 use ReflectionAttribute;
 use ReflectionMethod;
@@ -21,15 +22,18 @@ use Gt\Routing\Method\Post;
 class RouterCallback {
 	private Container $container;
 	private Injector $injector;
+	private Negotiator $negotiator;
 
 	public function __construct(
 		private ReflectionMethod $method,
 		private ReflectionAttribute $attribute,
 		?Container $container = null,
 		?Injector $injector = null,
+		?Negotiator $negotiator = null,
 	) {
 		$this->container = $container ?? new Container();
 		$this->injector = $injector ?? new Injector($this->container);
+		$this->negotiator = $negotiator ?? new Negotiator();
 	}
 
 	public function call(BaseRouter $router):void {
@@ -86,12 +90,32 @@ class RouterCallback {
 	}
 
 	/** @return string[] */
-	public function getAcceptedTypes():array {
+	public function getAcceptedTypes(string $acceptHeader = ""):array {
 		$acceptArgument = $this->attribute->getArguments()["accept"] ?? null;
 		if(is_null($acceptArgument)) {
 			return ["*/*"];
 		}
 
-		return explode(",", $acceptArgument);
+		$acceptHeaderParts = explode(",", $acceptHeader);
+		$acceptArgmentArray = explode(",", $acceptArgument);
+		foreach($acceptArgmentArray as $i => $arg) {
+			foreach($acceptHeaderParts as $acceptHeaderItem) {
+				if(str_starts_with($acceptHeaderItem, $arg)) {
+					$acceptArgmentArray[$i] = $acceptHeaderItem;
+				}
+			}
+		}
+
+		return $acceptArgmentArray;
+	}
+
+	public function getBestNegotiation(string $acceptHeader):?Accept {
+		/** @var Accept $mediaType */
+		/** @noinspection PhpUnnecessaryLocalVariableInspection */
+		$mediaType = $this->negotiator->getBest(
+			$acceptHeader,
+			$this->getAcceptedTypes($acceptHeader)
+		);
+		return $mediaType;
 	}
 }
