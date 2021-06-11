@@ -10,7 +10,6 @@ use SplFileObject;
 
 class PathMatcherTest extends TestCase {
 	public function testFindForUriPath_noRestrictions():void {
-		/** @var array<string, SplFileObject> $fakeFiles */
 		$fakeFiles = [
 			"one.html",
 			"two.html",
@@ -46,7 +45,7 @@ class PathMatcherTest extends TestCase {
 			"php"
 		);
 		self::assertNotEmpty($matches);
-		foreach($fakeFiles as $filePath => $file) {
+		foreach($fakeFiles as $filePath) {
 			if(str_ends_with($filePath, ".php")) {
 				self::assertContains($filePath, $matches);
 			}
