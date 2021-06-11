@@ -105,33 +105,38 @@ abstract class BaseRouter {
 	}
 
 	protected function addToLogicAssembly(
-		string $relativePath,
-		?string $logicName = null
+		string $relativePath
 	):void {
 		$this->addToAssembly(
 			Assembly::TYPE_LOGIC,
-			$relativePath,
-			$logicName
+			$relativePath
 		);
 	}
 
 	protected function addToViewAssembly(
-		string $relativePath,
-		?string $viewName = null
+		string $relativePath
 	):void {
 		$this->addToAssembly(
 			Assembly::TYPE_VIEW,
-			$relativePath,
-			$viewName
+			$relativePath
 		);
 	}
 
 	private function addToAssembly(
 		string $type,
-		string $path,
-		?string $name
+		string $path
 	):void {
+		$assembly = match($type) {
+			Assembly::TYPE_LOGIC => $this->logicAssembly,
+			Assembly::TYPE_VIEW => $this->viewAssembly,
+			default => null,
+		};
 
+		if(is_null($assembly)) {
+			return;
+		}
+
+		$assembly->add($path);
 	}
 
 	/**
