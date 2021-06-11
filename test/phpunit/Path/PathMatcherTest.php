@@ -19,8 +19,9 @@ class PathMatcherTest extends TestCase {
 
 		$expander = self::mockExpander(...$fakeFiles);
 
-		$sut = new PathMatcher($expander);
-		$matches = $sut->findForUriPath("/", "example-dir");
+		$baseDirectory = "example-dir";
+		$sut = new PathMatcher($baseDirectory, $expander);
+		$matches = $sut->findForUriPath("/", $baseDirectory);
 		self::assertNotEmpty($matches);
 		foreach($fakeFiles as $filePath) {
 			self::assertContains($filePath, $matches);
@@ -38,10 +39,11 @@ class PathMatcherTest extends TestCase {
 		];
 		$expander = self::mockExpander(...$fakeFiles);
 
-		$sut = new PathMatcher($expander);
+		$baseDirectory = "example-dir";
+		$sut = new PathMatcher($baseDirectory, $expander);
 		$matches = $sut->findForUriPath(
 			"/",
-			"example-dir",
+			$baseDirectory,
 			"php"
 		);
 		self::assertNotEmpty($matches);
@@ -69,7 +71,8 @@ class PathMatcherTest extends TestCase {
 		];
 		$expander = self::mockExpander(...$fakeFiles);
 
-		$sut = new PathMatcher($expander);
+		$baseDirectory = "example-dir";
+		$sut = new PathMatcher($baseDirectory, $expander);
 		$sut->addFilter(function(string $filePath, string $uriPath):bool {
 // Really simple filter function that kinda looks how WebEngine does it (but
 // extremely simplified).
@@ -83,7 +86,7 @@ class PathMatcherTest extends TestCase {
 		});
 		$matches = $sut->findForUriPath(
 			"/subdir1/two",
-			"example-dir",
+			$baseDirectory,
 			"php"
 		);
 		self::assertNotEmpty($matches);
