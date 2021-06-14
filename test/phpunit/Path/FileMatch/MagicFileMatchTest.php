@@ -44,4 +44,12 @@ class MagicFileMatchTest extends TestCase {
 		);
 		self::assertTrue($sut->matches("/something/very/deeply/nested"));
 	}
+
+	public function testMatches_dynamicDir():void {
+		$sut = new MagicFileMatch(
+			"basedir/something/@dynamic/_common.php",
+			"basedir"
+		);
+		self::assertTrue($sut->matches("/something/this-is-dynamic/test"));
+	}
 }

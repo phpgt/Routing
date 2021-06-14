@@ -12,12 +12,13 @@ class MagicFileMatch extends FileMatch {
 		$uriPath = trim($uriPath, "/");
 		$uriPathParts = explode("/", $uriPath);
 
-		$filePathTrimmed = $this->getTrimmedFilePath(true);
+		$filePathTrimmed = $this->getTrimmedFilePath();
+		$uriPathParts = $this->filterDynamicPathParts($filePathTrimmed, $uriPathParts);
 
-		$searchDir = $this->baseDir;
+		$searchDir = "";
 		foreach($uriPathParts as $pathPart) {
 			foreach(self::MAGIC_FILENAME_ARRAY as $magicFilename) {
-				$searchFilepath = "$searchDir/$magicFilename";
+				$searchFilepath = trim("$searchDir/$magicFilename", "/");
 				if($searchFilepath === $filePathTrimmed) {
 					return true;
 				}

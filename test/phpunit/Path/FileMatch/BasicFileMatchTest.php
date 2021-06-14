@@ -2,6 +2,7 @@
 namespace Gt\Routing\Test\Path\FileMatch;
 
 use Gt\Routing\Path\FileMatch\BasicFileMatch;
+use Gt\Routing\Path\FileMatch\FileMatch;
 use PHPUnit\Framework\TestCase;
 
 class BasicFileMatchTest extends TestCase {
@@ -43,5 +44,37 @@ class BasicFileMatchTest extends TestCase {
 			"page"
 		);
 		self::assertTrue($sut->matches("/"));
+	}
+
+	public function testMatches_dynamicDir():void {
+		$sut = new BasicFileMatch(
+			"page/shop/@category/@item.html",
+			"page"
+		);
+		self::assertTrue($sut->matches("/shop/cakes/chocolate"));
+	}
+
+	public function testMatches_dynamicDir_doesNotMatchIndex():void {
+		$sut = new BasicFileMatch(
+			"page/shop/@category/@item.html",
+			"page"
+		);
+		self::assertFalse($sut->matches("/shop/cakes"));
+	}
+
+	public function testMatches_dynamicDir_doesNotMatchDeeper():void {
+		$sut = new BasicFileMatch(
+			"page/shop/@category/@item.html",
+			"page"
+		);
+		self::assertFalse($sut->matches("/shop/cakes/chocolate/nothing"));
+	}
+
+	public function testMatches_dynamicDir_matchesIndex():void {
+		$sut = new BasicFileMatch(
+			"page/shop/@category/index.html",
+			"page"
+		);
+		self::assertTrue($sut->matches("/shop/cakes"));
 	}
 }

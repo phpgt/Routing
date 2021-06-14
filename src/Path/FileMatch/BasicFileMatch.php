@@ -3,14 +3,16 @@ namespace Gt\Routing\Path\FileMatch;
 
 /**
  * A "Basic" FileMatch is one that directly matches a Uri path to a
- * file path by name. Uris are
+ * file path by name.
  */
 class BasicFileMatch extends FileMatch {
 	public function matches(string $uriPath):bool {
 		$uriPath = trim($uriPath, "/");
-		$uriPathIndex = trim("$uriPath/index", "/");
-
+		$uriPathParts = explode("/", $uriPath);
 		$filePathTrimmed = $this->getTrimmedFilePath();
+		$uriPathParts = $this->filterDynamicPathParts($filePathTrimmed, $uriPathParts);
+		$uriPath = implode("/", $uriPathParts);
+		$uriPathIndex = trim("$uriPath/index", "/");
 
 		if($uriPath === $filePathTrimmed
 		|| $uriPathIndex === $filePathTrimmed) {

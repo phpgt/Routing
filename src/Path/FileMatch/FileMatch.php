@@ -17,6 +17,11 @@ abstract class FileMatch {
 			pathinfo($this->filePath, PATHINFO_DIRNAME),
 			pathinfo($this->filePath, PATHINFO_FILENAME),
 		]);
+		$filePathTrimmed = preg_replace(
+			"/\/@[^\/]+/",
+			"/@",
+			$filePathTrimmed
+		);
 
 		if($includeBaseDir) {
 			return $filePathTrimmed;
@@ -27,5 +32,29 @@ abstract class FileMatch {
 				strlen($this->baseDir . "/")
 			);
 		}
+	}
+
+	/**
+	 * @param string $filePath
+	 * @param string[] $uriPathParts
+	 * @return string[]
+	 */
+	protected function filterDynamicPathParts(
+		string $filePath,
+		array $uriPathParts
+	):array {
+		$filePathParts = explode("/", $filePath);
+		foreach($uriPathParts as $i => $uriPathPart) {
+			if(!isset($filePathParts[$i])) {
+				break;
+			}
+
+			$filePathPart = $filePathParts[$i];
+			if($filePathPart === "@") {
+				$uriPathParts[$i] = "@";
+			}
+		}
+
+		return $uriPathParts;
 	}
 }
