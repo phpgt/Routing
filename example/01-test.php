@@ -11,8 +11,14 @@ use Gt\Http\Header\RequestHeaders;
 use Gt\Http\Request;
 use Gt\Http\Uri;
 use Gt\Routing\BaseRouter;
-use Gt\Routing\LogicStreamWrapper;
+use Gt\Routing\LogicStream\LogicStreamNamespace;
+use Gt\Routing\LogicStream\LogicStreamWrapper;
+use Gt\Routing\Path\DynamicPath;
+use Gt\Routing\Path\FileMatch\BasicFileMatch;
+use Gt\Routing\Path\FileMatch\MagicFileMatch;
+use Gt\Routing\Path\PathMatcher;
 use Gt\Routing\Redirects;
+use Gt\ServiceContainer\Container;
 
 require(__DIR__ . "/../vendor/autoload.php");
 
@@ -57,12 +63,29 @@ $routerConfig = $config->getSection("router");
 // Set the current directory to the base directory of simple-site project.
 chdir(__DIR__ . "/project/simple-site");
 
-$container = new \Gt\ServiceContainer\Container();
+$container = new Container();
 $container->set($pageRequest);
+$dynamicPath = new DynamicPath();
+$container->set($dynamicPath);
+$baseAssemblyDirectory = "page";
 
-$pathMatcher = new \Gt\Routing\Path\PathMatcher();
-$pathMatcher->addFilter(function(string $filePath, string $uriPath):bool {
-	var_dump($uriPath);
+$pathMatcher = new PathMatcher($baseAssemblyDirectory);
+$pathMatcher->addFilter(function(string $filePath, string $uriPath, string $baseDir):bool {
+// There are three types of matching files: Basic, Magic and Dynamic.
+// Basic is where a URI matches directly to a file on disk.
+// Magic is where a URI matches a PHP.Gt-specific file, like _common or _header.
+// Dynamic is where a URI matches a file/directory marked as dynamic with "@".
+	$basicFileMatch = new BasicFileMatch($filePath, $baseDir);
+	if($basicFileMatch->matches($uriPath)) {
+		return true;
+	}
+
+	$magicFileMatch = new MagicFileMatch($filePath, $baseDir);
+	if($magicFileMatch->matches($uriPath)) {
+		return true;
+	}
+
+	return false;
 });
 $container->set($pathMatcher);
 $injector = new \Gt\ServiceContainer\Injector($container);
@@ -97,9 +120,14 @@ stream_wrapper_register("gt-logic-stream", LogicStreamWrapper::class);
 //require("gt-logic-stream://$logicCommonFilePath");
 ////////////////////////////
 
-foreach($logicAssembly = $router->getLogicAssembly() as $logicPathname) {
+foreach($router->getLogicAssembly() as $logicPathname) {
 	echo "Loading logic class: $logicPathname", PHP_EOL;
-	require($logicPathname);
+	require("gt-logic-stream://$logicPathname");
+
+// TODO: Build $className: it's either going to be path-matched with the application
+// namespace, or it's going to be automatically generated from the gt-logic-stream.
+// Need to look for either classes, load it, reference the "go", etc.
+
 	$className = $config->getSection("app")->getString("namespace");
 	$className .= "\\";
 
@@ -127,26 +155,42 @@ foreach($logicAssembly = $router->getLogicAssembly() as $logicPathname) {
 	}
 
 	$className = str_replace("@", "_", $className);
+	$logicStreamNamespace = new LogicStreamNamespace(
+		$logicPathname,
+		LogicStreamWrapper::NAMESPACE_PREFIX
+	);
 
-	$class = new $className();
-	$goFunctionName = $logicAssembly->getFunctionName() ?? "go";
-	$refFunction = new ReflectionMethod($class, $goFunctionName);
-	$data = $logicAssembly->getData();
-	$injectionParameters = [];
-	foreach($refFunction->getParameters() as $param) {
-		$paramName = $param->getName();
-		$paramType = $param->getType()->getName();
-		if(!isset($data[$paramName])) {
-			continue;
+	$class = null;
+	$goFunctionName = "go";
+	/** @var ReflectionMethod|ReflectionFunction|null $refFunction */
+	$refFunction = null;
+
+	if(class_exists($className)) {
+		$class = new $className();
+		$refFunction = new ReflectionMethod($class, $goFunctionName);
+	}
+	else {
+		$refFunctionFQN = "$logicStreamNamespace\\$goFunctionName";
+
+		if(function_exists($refFunctionFQN)) {
+			$refFunction = new ReflectionFunction($refFunctionFQN);
 		}
-		if(gettype($data[$paramName]) !== $paramType
-		&& get_class($data[$paramName]) !== $paramType) {
-			continue;
-		}
-		array_push($injectionParameters, $data[$paramName]);
 	}
 
-	call_user_func([$class, $goFunctionName], ...$injectionParameters);
+	if(is_null($refFunction)) {
+		die("ERROR! Can't load go function!");
+	}
+
+	if($class) {
+		/** @var ReflectionMethod $refFunction */
+		$closure = $refFunction->getClosure($class);
+	}
+	else {
+		/** @var ReflectionFunction $refFunction */
+		$closure = $refFunction->getClosure();
+	}
+
+	$injector->invoke($class, $closure);
 }
 foreach($router->getViewAssembly() as $viewPathname) {
 	echo "Loading view part: $viewPathname", PHP_EOL;

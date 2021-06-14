@@ -15,10 +15,10 @@ class AppRouter extends BaseRouter {
 		echo "API ROUTE CALLBACK", PHP_EOL;
 		foreach($pathMatcher->findForUriPath(
 			$request->getUri()->getPath(),
-			"api",
+			"api/v1",
 			"php"
 		) as $logicName => $path) {
-			$this->addToLogicAssembly($path, $logicName);
+			$this->addToLogicAssembly($path);
 		}
 	}
 
@@ -28,12 +28,27 @@ class AppRouter extends BaseRouter {
 		// TODO: add logic and view assembly in the api directory
 		// (configured from $this->routerConfig)
 
-		foreach($pathMatcher->findForUriPath(
+		$sortNestLevelCallback = fn(string $a, string $b) =>
+			substr_count($a, "/") > substr_count($b, "/");
+
+		$matchingLogics = $pathMatcher->findForUriPath(
 			$request->getUri()->getPath(),
 			"page",
 			"php"
-		) as $logicName => $path) {
-			$this->addToLogicAssembly($path, $logicName);
+		);
+		usort($matchingLogics, $sortNestLevelCallback);
+		foreach($matchingLogics as $path) {
+			$this->addToLogicAssembly($path);
+		}
+
+		$matchingViews = $pathMatcher->findForUriPath(
+			$request->getUri()->getPath(),
+			"page",
+			"html"
+		);
+		usort($matchingViews, $sortNestLevelCallback);
+		foreach($matchingViews as $path) {
+			$this->addToViewAssembly($path);
 		}
 	}
 
