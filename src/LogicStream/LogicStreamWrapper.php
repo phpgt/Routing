@@ -1,9 +1,10 @@
 <?php
-namespace Gt\Routing;
+namespace Gt\Routing\LogicStream;
 
 use SplFileObject;
 
 class LogicStreamWrapper {
+	const NAMESPACE_PREFIX = "Gt_App_Automatic_Routing";
 	private int $position;
 	private string $path;
 	private string $contents;
@@ -58,6 +59,8 @@ class LogicStreamWrapper {
 		while(!$file->eof() && !$foundNamespace) {
 			$line = $file->fgets();
 			if($lineNumber === 0) {
+// TODO: Allow hashbangs before <?php
+// Maybe this is possible by just skipping while the first character is a hash, and not increasing the line number.
 				if(!str_starts_with($line, "<?php")) {
 					throw new \Exception("Logic file at " . $this->path . " must start by opening a PHP tag. See https://www.php.gt/routing/logic-stream-wrapper");
 				}
@@ -78,7 +81,10 @@ class LogicStreamWrapper {
 					$foundNamespace = true;
 				}
 				elseif($trimmedLine ) {
-					$namespace = $this->getNamespace();
+					$namespace = new LogicStreamNamespace(
+						$this->path,
+						self::NAMESPACE_PREFIX
+					);
 					$this->contents .= "namespace $namespace;\n\n";
 					$foundNamespace = true;
 				}
@@ -92,20 +98,5 @@ class LogicStreamWrapper {
 			$line = $file->fgets();
 			$this->contents .= $line;
 		}
-	}
-
-	private function getNamespace():string {
-		$namespace = "Gt_App_Automatic_Routing";
-		$pathParts = explode(DIRECTORY_SEPARATOR, $this->path);
-//		array_pop($pathParts);
-		foreach($pathParts as $part) {
-			$namespace .= "\\$part";
-		}
-
-		return str_replace(
-			["@", "-", "+", "~", "%", "."],
-			"_",
-			$namespace
-		);
 	}
 }

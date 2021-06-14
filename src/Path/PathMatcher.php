@@ -7,6 +7,7 @@ class PathMatcher {
 	private array $filterArray;
 
 	public function __construct(
+		private string $baseDirectory,
 		DirectoryExpander $expander = null
 	) {
 		$this->expander = $expander ?? new DirectoryExpander();
@@ -88,7 +89,8 @@ class PathMatcher {
 				fn(string $filePath):bool => call_user_func(
 					$filter,
 					$filePath,
-					$uriPath
+					$uriPath,
+					$this->baseDirectory
 				)
 			);
 		}

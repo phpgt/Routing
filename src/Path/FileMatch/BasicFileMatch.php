@@ -10,11 +10,7 @@ class BasicFileMatch extends FileMatch {
 		$uriPath = trim($uriPath, "/");
 		$uriPathIndex = trim("$uriPath/index", "/");
 
-		$filePathTrimmed = implode("/", [
-			pathinfo($this->filePath, PATHINFO_DIRNAME),
-			pathinfo($this->filePath, PATHINFO_FILENAME),
-		]);
-		$filePathTrimmed = substr($filePathTrimmed, strlen($this->baseDir . "/"));
+		$filePathTrimmed = $this->getTrimmedFilePath();
 
 		if($uriPath === $filePathTrimmed
 		|| $uriPathIndex === $filePathTrimmed) {
