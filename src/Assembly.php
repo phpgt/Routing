@@ -1,10 +1,11 @@
 <?php
 namespace Gt\Routing;
 
+use Countable;
 use Iterator;
 
 /** @implements Iterator<int, string> */
-class Assembly implements Iterator {
+class Assembly implements Iterator, Countable {
 	const TYPE_LOGIC = "logic";
 	const TYPE_VIEW = "view";
 
@@ -50,5 +51,9 @@ class Assembly implements Iterator {
 
 	public function rewind():void {
 		$this->iteratorIndex = 0;
+	}
+
+	public function count():int {
+		return count($this->pathList);
 	}
 }
