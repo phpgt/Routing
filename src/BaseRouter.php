@@ -21,6 +21,7 @@ abstract class BaseRouter {
 	private Assembly $logicAssembly;
 	private Container $container;
 	private Injector $injector;
+	private string $viewClassName;
 
 	public function __construct(
 		protected ?ConfigSection $routerConfig = null,
@@ -94,6 +95,14 @@ abstract class BaseRouter {
 
 // TODO: Call with the DI, so the callback can receive all the required params.
 		$bestRouterCallback->call($this);
+	}
+
+	public function setViewClass(string $className):void {
+		$this->viewClassName = $className;
+	}
+
+	public function getViewClass():?string {
+		return $this->viewClassName ?? null;
 	}
 
 	public function getLogicAssembly():Assembly {
