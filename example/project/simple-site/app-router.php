@@ -57,9 +57,5 @@ class AppRouter extends BaseRouter {
 		DynamicPath $dynamicPath
 	):void {
 		$this->addToLogicAssembly("class/Output/Greeter.php");
-		$this->setAssemblyData(
-			"name",
-			$dynamicPath->getString("name")
-		);
 	}
 }
