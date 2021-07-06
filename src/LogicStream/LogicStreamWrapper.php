@@ -4,7 +4,9 @@ namespace Gt\Routing\LogicStream;
 use SplFileObject;
 
 class LogicStreamWrapper {
-	const NAMESPACE_PREFIX = "Gt_App_Automatic_Routing";
+	const NAMESPACE_PREFIX = "Gt\\AppLogic";
+	const STREAM_NAME = "gt-logic-stream";
+
 	private int $position;
 	private string $path;
 	private string $contents;
