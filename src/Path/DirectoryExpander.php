@@ -13,6 +13,10 @@ class DirectoryExpander {
 	 * the value is the current file object.
 	 */
 	public function generate(string $dirPath):Generator {
+		if(!is_dir($dirPath)) {
+			return;
+		}
+
 		$directoryIterator = new RecursiveDirectoryIterator(
 			$dirPath,
 			FilesystemIterator::KEY_AS_PATHNAME

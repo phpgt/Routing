@@ -22,6 +22,7 @@ abstract class BaseRouter {
 	private Container $container;
 	private Injector $injector;
 	private string $viewClassName;
+	private bool $routeCompleted;
 
 	public function __construct(
 		protected ?ConfigSection $routerConfig = null,
@@ -30,6 +31,7 @@ abstract class BaseRouter {
 	) {
 		$this->viewAssembly = $viewAssembly ?? new Assembly();
 		$this->logicAssembly = $logicAssembly ?? new Assembly();
+		$this->routeCompleted = false;
 	}
 
 	public function setContainer(Container $container):void {
@@ -95,6 +97,7 @@ abstract class BaseRouter {
 
 // TODO: Call with the DI, so the callback can receive all the required params.
 		$bestRouterCallback->call($this);
+		$this->routeCompleted = true;
 	}
 
 	public function setViewClass(string $className):void {
@@ -106,6 +109,9 @@ abstract class BaseRouter {
 	}
 
 	public function getLogicAssembly():Assembly {
+		if(!$this->routeCompleted) {
+			throw new NotYetRoutedException();
+		}
 		return $this->logicAssembly;
 	}
 

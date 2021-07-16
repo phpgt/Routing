@@ -33,9 +33,7 @@ class PathMatcher {
 		string...$extensions
 	):array {
 		$matches = $this->getAllFiles($dirPath, ...$extensions);
-		$matches = $this->filterUri($matches, $uriPath);
-
-		return $matches;
+		return $this->filterUri($matches, $uriPath, $dirPath);
 	}
 
 	/**
@@ -79,7 +77,8 @@ class PathMatcher {
 	 */
 	private function filterUri(
 		array $filePathArray,
-		string $uriPath
+		string $uriPath,
+		string $subDir
 	):array {
 		$filteredFilePathArray = $filePathArray;
 
@@ -90,7 +89,8 @@ class PathMatcher {
 					$filter,
 					$filePath,
 					$uriPath,
-					$this->baseDirectory
+					$this->baseDirectory,
+					$subDir
 				)
 			);
 		}
