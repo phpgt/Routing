@@ -127,6 +127,10 @@ $dynamicPath = new DynamicPath(
 );
 $container->set($dynamicPath);
 
+foreach($viewAssembly as $viewPathname) {
+	echo "Loading view part: $viewPathname", PHP_EOL;
+}
+
 foreach($logicAssembly as $logicPathname) {
 	echo "Loading logic class: $logicPathname", PHP_EOL;
 	require("gt-logic-stream://$logicPathname");
@@ -198,7 +202,4 @@ foreach($logicAssembly as $logicPathname) {
 	}
 
 	$injector->invoke($class, $closure);
-}
-foreach($viewAssembly as $viewPathname) {
-	echo "Loading view part: $viewPathname", PHP_EOL;
 }

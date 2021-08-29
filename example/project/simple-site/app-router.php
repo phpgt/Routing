@@ -30,6 +30,8 @@ class AppRouter extends BaseRouter {
 
 		$sortNestLevelCallback = fn(string $a, string $b) =>
 			substr_count($a, "/") > substr_count($b, "/");
+		$footerSort = fn(string $a, string $b) =>
+			strtok(basename($a), ".") === "_footer" ? 1 : 0;
 
 		$matchingLogics = $pathMatcher->findForUriPath(
 			$request->getUri()->getPath(),
@@ -47,6 +49,7 @@ class AppRouter extends BaseRouter {
 			"html"
 		);
 		usort($matchingViews, $sortNestLevelCallback);
+		usort($matchingViews, $footerSort);
 		foreach($matchingViews as $path) {
 			$this->addToViewAssembly($path);
 		}
