@@ -5,6 +5,7 @@ class MagicFileMatch extends FileMatch {
 	const MAGIC_FILENAME_ARRAY = [
 		"_common",
 		"_header",
+		"{current}", // this will be replaced by the current page name
 		"_footer",
 	];
 

@@ -31,7 +31,7 @@ $config = ConfigFactory::createFromPathName(
 // Request 1: A page request, as if it is sent from a web browser.
 $pageRequest = new Request(
 	"GET",
-	new Uri("/shop/item/chair"),
+	new Uri("/shop/furniture/chair"),
 	new RequestHeaders([
 // An example accept header from Firefox when requesting a normal link:
 		"Accept" => "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
@@ -65,8 +65,6 @@ chdir(__DIR__ . "/project/simple-site");
 
 $container = new Container();
 $container->set($pageRequest);
-$dynamicPath = new DynamicPath();
-$container->set($dynamicPath);
 $baseAssemblyDirectory = "page";
 
 $pathMatcher = new PathMatcher($baseAssemblyDirectory);
@@ -120,7 +118,16 @@ stream_wrapper_register("gt-logic-stream", LogicStreamWrapper::class);
 //require("gt-logic-stream://$logicCommonFilePath");
 ////////////////////////////
 
-foreach($router->getLogicAssembly() as $logicPathname) {
+$logicAssembly = $router->getLogicAssembly();
+$viewAssembly = $router->getViewAssembly();
+$dynamicPath = new DynamicPath(
+	$pageRequest->getUri()->getPath(),
+	$logicAssembly,
+	$viewAssembly
+);
+$container->set($dynamicPath);
+
+foreach($logicAssembly as $logicPathname) {
 	echo "Loading logic class: $logicPathname", PHP_EOL;
 	require("gt-logic-stream://$logicPathname");
 
@@ -192,6 +199,6 @@ foreach($router->getLogicAssembly() as $logicPathname) {
 
 	$injector->invoke($class, $closure);
 }
-foreach($router->getViewAssembly() as $viewPathname) {
+foreach($viewAssembly as $viewPathname) {
 	echo "Loading view part: $viewPathname", PHP_EOL;
 }
