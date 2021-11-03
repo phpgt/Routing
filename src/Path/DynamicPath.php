@@ -14,7 +14,7 @@ class DynamicPath {
 		$this->assemblyList = $assemblyList;
 	}
 
-	public function get(string $key):?string {
+	public function get(string $key = null):?string {
 		$requestPathParts = explode("/", $this->requestPath);
 
 		foreach($this->assemblyList as $assembly) {
@@ -25,6 +25,11 @@ class DynamicPath {
 					if($f[0] !== "@") {
 						continue;
 					}
+
+					if(is_null($key)) {
+						return $requestPathParts[count($filePathParts) - 1] ?? null;
+					}
+
 					if("@$key" !== $f) {
 						continue;
 					}
