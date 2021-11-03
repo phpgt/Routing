@@ -31,7 +31,7 @@ $config = ConfigFactory::createFromPathName(
 // Request 1: A page request, as if it is sent from a web browser.
 $pageRequest = new Request(
 	"GET",
-	new Uri("/shop/furniture/chair"),
+	new Uri("/shop/phone/oneplus"),
 	new RequestHeaders([
 // An example accept header from Firefox when requesting a normal link:
 		"Accept" => "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
