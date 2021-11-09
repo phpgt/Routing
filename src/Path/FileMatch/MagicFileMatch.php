@@ -10,7 +10,7 @@ class MagicFileMatch extends FileMatch {
 	];
 
 	public function matches(string $uriPath):bool {
-		$uriPath = trim($uriPath, "/");
+		$uriPath = trim($uriPath, "/") . "/";
 		$uriPathParts = explode("/", $uriPath);
 
 		$filePathTrimmed = $this->getTrimmedFilePath();
@@ -18,6 +18,8 @@ class MagicFileMatch extends FileMatch {
 
 		$searchDir = "";
 		foreach($uriPathParts as $pathPart) {
+
+
 			foreach(self::MAGIC_FILENAME_ARRAY as $magicFilename) {
 				$searchFilepath = trim("$searchDir/$magicFilename", "/");
 				if($searchFilepath === $filePathTrimmed) {
