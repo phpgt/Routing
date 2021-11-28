@@ -59,16 +59,25 @@ class DynamicPathTest extends TestCase {
 	}
 
 	public function testGetUrl():void {
-		$assembly = self::createMock(Assembly::class);
-		$assembly->method("current")
+		$viewAssembly = self::createMock(Assembly::class);
+		$viewAssembly->method("current")
 			->willReturnOnConsecutiveCalls(
 				"page/_header.html",
 				"page/_footer.html",
 				"page/shop/@category/@itemName.html",
 			);
-		$assembly->method("valid")
+		$viewAssembly->method("valid")
 			->willReturn(true);
-		$sut = new DynamicPath("/shop/OnePlus/6T", $assembly);
+		$logicAssembly = self::createMock(Assembly::class);
+		$logicAssembly->method("current")
+			->willReturnOnConsecutiveCalls(
+				"page/_common.php",
+				"page/shop/_common.php",
+				"page/shop/@category/@itemName.php",
+			);
+		$logicAssembly->method("valid")
+			->willReturn(true);
+		$sut = new DynamicPath("/shop/OnePlus/6T", $viewAssembly, $logicAssembly);
 		self::assertSame("/shop/@category/@itemName", $sut->getUrl("page/"));
 	}
 }
