@@ -10,6 +10,7 @@ use Gt\Routing\Method\Put;
 use Gt\Routing\Method\Trace;
 use Gt\ServiceContainer\Container;
 use Gt\ServiceContainer\Injector;
+use Gt\ServiceContainer\LazyLoad;
 use Negotiation\Accept;
 use Negotiation\Negotiator;
 use ReflectionAttribute;
@@ -24,6 +25,7 @@ class RouterCallback {
 	private Injector $injector;
 	private Negotiator $negotiator;
 
+	/** @param ReflectionAttribute<HttpRouteMethod> $attribute */
 	public function __construct(
 		private ReflectionMethod $method,
 		private ReflectionAttribute $attribute,
