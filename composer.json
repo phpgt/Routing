@@ -6,8 +6,8 @@
 	"require": {
 		"php": ">=8.0",
 		"phpgt/typesafegetter": "^1.2.2",
-		"phpgt/config": "^1.1.0",
-		"phpgt/http": "^1",
+		"phpgt/config": "^v1.1.0",
+		"phpgt/http": "^v1",
 		"phpgt/servicecontainer": "1.*",
 		"psr/http-message": "1.*",
 
@@ -16,7 +16,7 @@
 
 	"require-dev": {
 		"phpunit/phpunit": "~9.5",
-		"phpstan/phpstan": "~1.1"
+		"phpstan/phpstan": "~1.2"
 	},
 
 	"license": "MIT",

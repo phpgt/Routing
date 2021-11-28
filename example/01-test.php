@@ -31,27 +31,10 @@ $config = ConfigFactory::createFromPathName(
 // Request 1: A page request, as if it is sent from a web browser.
 $pageRequest = new Request(
 	"GET",
-	new Uri("/shop/phone/oneplus"),
+	new Uri("/project"),
 	new RequestHeaders([
 // An example accept header from Firefox when requesting a normal link:
 		"Accept" => "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-	])
-);
-// Request 2: An API request, as if it were sent via cURL.
-$apiRequest = new Request(
-	"GET",
-	new Uri("/v1/shop/item/chair"),
-	new RequestHeaders([
-		"Accept" => "application/xml,application/json",
-		"Authorization: token 0123456789abcdef"
-	])
-);
-// Request 3: Another request but working with text/plain for example's sake.
-$greetRequest = new Request(
-	"POST",
-	new Uri("/greet/Greg"),
-	new RequestHeaders([
-		"Accept" => "text/plain"
 	])
 );
 
@@ -107,16 +90,7 @@ if(is_file("redirects.csv")) {
 $router->route($pageRequest);
 echo "Router::route() complete", PHP_EOL;
 
-// TEMPORARY MANUAL TESTING:
-// TODO: If there is no "namespace" declaration in the top of the file,
-// import it into memory and add a namespace yourself (namespace according to
-// the current request).
 stream_wrapper_register("gt-logic-stream", LogicStreamWrapper::class);
-//$logicFilePath = "page/shop/@category/@itemName.php";
-//$logicCommonFilePath = "page/shop/_common.php";
-//require("gt-logic-stream://$logicFilePath");
-//require("gt-logic-stream://$logicCommonFilePath");
-////////////////////////////
 
 $logicAssembly = $router->getLogicAssembly();
 $viewAssembly = $router->getViewAssembly();

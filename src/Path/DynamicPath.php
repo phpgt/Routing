@@ -46,4 +46,28 @@ class DynamicPath {
 
 		return null;
 	}
+
+	public function getUrl(string $viewBasePath):string {
+		$path = "";
+
+		foreach($this->assemblyList as $assembly) {
+			foreach($assembly as $path) {
+				$fileName = pathinfo($path, PATHINFO_FILENAME);
+				$ext = pathinfo($path, PATHINFO_EXTENSION);
+				if($ext !== "html") {
+					continue(2);
+				}
+
+				if($fileName[0] === "_") {
+					continue;
+				}
+
+				break;
+			}
+		}
+
+		$url = "/" . trim(substr($path, strlen($viewBasePath)), "/");
+		$url = strtok($url, ".");
+		return $url;
+	}
 }
