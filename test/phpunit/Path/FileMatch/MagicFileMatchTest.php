@@ -37,6 +37,14 @@ class MagicFileMatchTest extends TestCase {
 		self::assertTrue($sut->matches("/something/nested"));
 	}
 
+	public function testMatches_parentParentDir():void {
+		$sut = new MagicFileMatch(
+			"basedir/_common.php",
+			"basedir"
+		);
+		self::assertTrue($sut->matches("/something/deeply/nested"));
+	}
+
 	public function testMatches_ancestorDir():void {
 		$sut = new MagicFileMatch(
 			"basedir/something/_common.php",
@@ -51,5 +59,13 @@ class MagicFileMatchTest extends TestCase {
 			"basedir"
 		);
 		self::assertTrue($sut->matches("/something/this-is-dynamic/test"));
+	}
+
+	public function testMatches_dynamicInDir():void {
+		$sut = new MagicFileMatch(
+			"basedir/something/@dynamic/_common.php",
+			"basedir"
+		);
+		self::assertTrue($sut->matches("/something/this-is-dynamic"));
 	}
 }
