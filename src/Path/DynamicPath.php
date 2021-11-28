@@ -62,7 +62,7 @@ class DynamicPath {
 					continue;
 				}
 
-				break;
+				break(2);
 			}
 		}
 
