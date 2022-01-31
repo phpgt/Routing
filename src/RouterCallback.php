@@ -76,6 +76,10 @@ class RouterCallback {
 	}
 
 	public function matchesAccept(string $acceptHeader):bool {
+		if(!$acceptHeader) {
+			$acceptHeader = "*/*";
+		}
+
 		$acceptArgument = $this->attribute->getArguments()["accept"] ?? null;
 		if(is_null($acceptArgument)) {
 			return true;
@@ -112,6 +116,9 @@ class RouterCallback {
 	}
 
 	public function getBestNegotiation(string $acceptHeader):?Accept {
+		if(!$acceptHeader) {
+			$acceptHeader = "*/*";
+		}
 		/** @var Accept $mediaType */
 		/** @noinspection PhpUnnecessaryLocalVariableInspection */
 		$mediaType = $this->negotiator->getBest(
