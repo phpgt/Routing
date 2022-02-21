@@ -65,4 +65,31 @@ class AssemblyTest extends TestCase {
 			self::assertSame($pathList[$i], $path);
 		}
 	}
+
+	public function testContainsDistincFile_allMagic():void {
+		$pathList = [
+			"/var/www/_header.html",
+			"/var/www/_footer.html",
+		];
+		$sut = new Assembly();
+		foreach($pathList as $path) {
+			$sut->add($path);
+		}
+
+		self::assertFalse($sut->containsDistinctFile());
+	}
+
+	public function testContainsDistinctFile():void {
+		$pathList = [
+			"/var/www/_header.html",
+			"/var/www/index.html",
+			"/var/www/_footer.html",
+		];
+		$sut = new Assembly();
+		foreach($pathList as $path) {
+			$sut->add($path);
+		}
+
+		self::assertTrue($sut->containsDistinctFile());
+	}
 }
