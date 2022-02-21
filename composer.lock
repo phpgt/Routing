@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "dfae077fd9e69a21e53b41bec86ddad9",
+    "content-hash": "5b96b91a17ae52ead8df9828af8f25da",
     "packages": [
         {
             "name": "magicalex/write-ini-file",
