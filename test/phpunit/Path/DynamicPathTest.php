@@ -80,4 +80,54 @@ class DynamicPathTest extends TestCase {
 		$sut = new DynamicPath("/shop/OnePlus/6T", $viewAssembly, $logicAssembly);
 		self::assertSame("/shop/@category/@itemName", $sut->getUrl("page/"));
 	}
+
+	public function testDeeperDynamicPages_noExtra():void {
+		$assembly = self::createMock(Assembly::class);
+		$assembly->method("current")
+			->willReturn("page/shop/@category/@@itemName.php");
+		$assembly->method("valid")
+			->willReturn(true);
+		$sut = new DynamicPath("/shop/OnePlus/6T", $assembly);
+		self::assertEquals("6T", $sut->get());
+	}
+
+	public function testDeeperDynamicPages_getByName():void {
+		$assembly = self::createMock(Assembly::class);
+		$assembly->method("current")
+			->willReturn("page/shop/@category/@@itemName.php");
+		$assembly->method("valid")
+			->willReturn(true);
+		$sut = new DynamicPath("/shop/OnePlus/6T/64GB", $assembly);
+		self::assertEquals("6T", $sut->get("itemName"));
+	}
+
+	public function testDeeperDynamicPages_getExtra():void {
+		$assembly = self::createMock(Assembly::class);
+		$assembly->method("current")
+			->willReturn("page/shop/@category/@@itemName.php");
+		$assembly->method("valid")
+			->willReturn(true);
+		$sut = new DynamicPath("/shop/OnePlus/6T/64GB", $assembly);
+		self::assertEquals("64GB", $sut->getExtra());
+	}
+
+	public function testDeeperDynamicPages_getExtraMultiple():void {
+		$assembly = self::createMock(Assembly::class);
+		$assembly->method("current")
+			->willReturn("page/shop/@category/@@itemName.php");
+		$assembly->method("valid")
+			->willReturn(true);
+		$sut = new DynamicPath("/shop/OnePlus/6T/64GB/refurbished", $assembly);
+		self::assertEquals("64GB/refurbished", $sut->getExtra());
+	}
+
+	public function testDeeperDynamicPages_getExtraMultiple_indexed():void {
+		$assembly = self::createMock(Assembly::class);
+		$assembly->method("current")
+			->willReturn("page/shop/@category/@@itemName.php");
+		$assembly->method("valid")
+			->willReturn(true);
+		$sut = new DynamicPath("/shop/OnePlus/6T/64GB/refurbished", $assembly);
+		self::assertEquals("64GB", $sut->getExtra()->getIndex(0));
+	}
 }

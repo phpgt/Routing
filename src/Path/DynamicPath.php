@@ -14,7 +14,7 @@ class DynamicPath {
 		$this->assemblyList = $assemblyList;
 	}
 
-	public function get(string $key = null):?string {
+	public function get(string $key = null, bool $extra = false):?string {
 		$requestPathParts = explode("/", $this->requestPath);
 
 		foreach($this->assemblyList as $assembly) {
@@ -27,10 +27,20 @@ class DynamicPath {
 					}
 
 					if(is_null($key)) {
-						return $requestPathParts[count($filePathParts) - 1] ?? null;
+						if($extra) {
+							$test = "";
+							for($ppi = count($filePathParts), $len = count($requestPathParts); $ppi < $len; $ppi++) {
+								$test .= $requestPathParts[$ppi];
+								$test .= "/";
+							}
+							return rtrim($test, "/");
+						}
+						else {
+							return $requestPathParts[count($filePathParts) - 1] ?? null;
+						}
 					}
 
-					if("@$key" !== $f) {
+					if(ltrim($f, "@") !== $key) {
 						continue;
 					}
 
@@ -67,7 +77,10 @@ class DynamicPath {
 		}
 
 		$url = "/" . trim(substr($path, strlen($viewBasePath)), "/");
-		$url = strtok($url, ".");
-		return $url;
+		return strtok($url, ".");
+	}
+
+	public function getExtra():Extra {
+		return new Extra($this->get(extra: true));
 	}
 }
