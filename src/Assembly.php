@@ -33,6 +33,17 @@ class Assembly implements Iterator, Countable {
 		$this->pathList = array_values($this->pathList);
 	}
 
+	public function containsDistinctFile():bool {
+		foreach($this->pathList as $path) {
+			$fileName = pathinfo($path, PATHINFO_FILENAME);
+			if($fileName[0] !== "_") {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	public function current():string {
 		return $this->pathList[$this->iteratorIndex];
 	}
