@@ -4,7 +4,6 @@ namespace Gt\Routing\Test;
 use Exception;
 use Gt\Config\ConfigSection;
 use Gt\Http\Request;
-use Gt\Http\ResponseStatusException\AbstractResponseStatusException;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotAcceptable;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotFound;
 use Gt\Http\ResponseStatusException\Redirection\HttpFound;
@@ -234,6 +233,7 @@ class BaseRouterTest extends TestCase {
 				throw new HttpNotFound();
 			}
 
+			/** @noinspection PhpUnused */
 			#[Any(path: "/something", accept: "application/json,application/xml")]
 			public function thisShouldMatch():void {
 				throw new Exception("Match!");
@@ -246,6 +246,45 @@ class BaseRouterTest extends TestCase {
 			}
 		};
 		self::expectExceptionMessage("Match!");
+		$sut->route($request);
+	}
+
+	public function testRoute_matchesFirstRouteIfStarAccept():void {
+		$uri = self::createMock(Uri::class);
+		$uri->method("getPath")->willReturn("/something");
+		$request = self::createMock(Request::class);
+		$request->method("getUri")->willReturn($uri);
+		$request->method("getMethod")->willReturn("GET");
+		$request->method("getHeaderLine")
+			->with("accept")
+			->willReturn("*/*");
+
+		$sut = new class extends BaseRouter {
+			/** @noinspection PhpUnused */
+			#[Any(path: "/something", accept: "text/html")]
+			public function thisShouldNotMatch():void {
+				throw new Exception("Route 1");
+			}
+
+			/** @noinspection PhpUnused */
+			#[Any(path: "/something", accept: "fake/nothing")]
+			public function thisShouldNotMatchBecauseItsNothing():void {
+				throw new Exception("Route 2");
+			}
+
+			/** @noinspection PhpUnused */
+			#[Any(path: "/something", accept: "application/json,application/xml")]
+			public function thisShouldMatch():void {
+				throw new Exception("Route 3");
+			}
+
+			/** @noinspection PhpUnused */
+			#[Any(path: "/something", accept: "application/xhtml+xml,application/xml;q=0.8")]
+			public function thisShouldNotMatchBecauseLessQuality():void {
+				throw new Exception("Route 4");
+			}
+		};
+		self::expectExceptionMessage("Route 1");
 		$sut->route($request);
 	}
 
