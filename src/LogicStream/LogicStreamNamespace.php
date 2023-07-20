@@ -1,7 +1,9 @@
 <?php
 namespace Gt\Routing\LogicStream;
 
-class LogicStreamNamespace implements \Stringable {
+use Stringable;
+
+class LogicStreamNamespace implements Stringable {
 	public function __construct(
 		private string $path,
 		private string $namespacePrefix = ""

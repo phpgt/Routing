@@ -318,7 +318,7 @@ class BaseRouterTest extends TestCase {
 		$sut->handleRedirects($redirects, $request);
 	}
 
-	public function data_redirectCode():array {
+	public static function data_redirectCode():array {
 		$responseCodes = [
 			300 => HttpMultipleChoices::class,
 			301 => HttpMovedPermanently::class,
