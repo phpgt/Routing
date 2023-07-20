@@ -10,7 +10,6 @@ use Gt\Routing\Method\Put;
 use Gt\Routing\Method\Trace;
 use Gt\ServiceContainer\Container;
 use Gt\ServiceContainer\Injector;
-use Gt\ServiceContainer\LazyLoad;
 use Negotiation\Accept;
 use Negotiation\Negotiator;
 use ReflectionAttribute;
@@ -46,16 +45,16 @@ class RouterCallback {
 		$methodsArgument = $this->attribute->getArguments()["methods"] ?? [];
 
 		$allowedMethods = match($this->attribute->getName()) {
-			Any::class => HttpRouteMethod::METHODS_ALL,
-			Connect::class => [HttpRouteMethod::METHOD_CONNECT],
-			Delete::class => [HttpRouteMethod::METHOD_DELETE],
-			Get::class => [HttpRouteMethod::METHOD_GET],
-			Head::class => [HttpRouteMethod::METHOD_HEAD],
-			Options::class => [HttpRouteMethod::METHOD_OPTIONS],
-			Patch::class => [HttpRouteMethod::METHOD_PATCH],
-			Post::class => [HttpRouteMethod::METHOD_POST],
-			Put::class => [HttpRouteMethod::METHOD_PUT],
-			Trace::class => [HttpRouteMethod::METHOD_TRACE],
+			Any::class => HttpRoute::METHODS_ALL,
+			Connect::class => [HttpRoute::METHOD_CONNECT],
+			Delete::class => [HttpRoute::METHOD_DELETE],
+			Get::class => [HttpRoute::METHOD_GET],
+			Head::class => [HttpRoute::METHOD_HEAD],
+			Options::class => [HttpRoute::METHOD_OPTIONS],
+			Patch::class => [HttpRoute::METHOD_PATCH],
+			Post::class => [HttpRoute::METHOD_POST],
+			Put::class => [HttpRoute::METHOD_PUT],
+			Trace::class => [HttpRoute::METHOD_TRACE],
 			default => $methodsArgument,
 		};
 		$allowedMethods = array_map(
@@ -103,16 +102,16 @@ class RouterCallback {
 		}
 
 		$acceptHeaderParts = explode(",", $acceptHeader);
-		$acceptArgmentArray = explode(",", $acceptArgument);
-		foreach($acceptArgmentArray as $i => $arg) {
+		$acceptArgumentArray = explode(",", $acceptArgument);
+		foreach($acceptArgumentArray as $i => $arg) {
 			foreach($acceptHeaderParts as $acceptHeaderItem) {
 				if(str_starts_with($acceptHeaderItem, $arg)) {
-					$acceptArgmentArray[$i] = $acceptHeaderItem;
+					$acceptArgumentArray[$i] = $acceptHeaderItem;
 				}
 			}
 		}
 
-		return $acceptArgmentArray;
+		return $acceptArgumentArray;
 	}
 
 	public function getBestNegotiation(string $acceptHeader):?Accept {
@@ -120,7 +119,6 @@ class RouterCallback {
 			$acceptHeader = "*/*";
 		}
 		/** @var Accept $mediaType */
-		/** @noinspection PhpUnnecessaryLocalVariableInspection */
 		$mediaType = $this->negotiator->getBest(
 			$acceptHeader,
 			$this->getAcceptedTypes($acceptHeader)

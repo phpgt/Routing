@@ -1,6 +1,7 @@
 <?php
 namespace Gt\Routing\LogicStream;
 
+use Exception;
 use SplFileObject;
 
 class LogicStreamWrapper {
@@ -64,7 +65,7 @@ class LogicStreamWrapper {
 // TODO: Allow hashbangs before <?php
 // Maybe this is possible by just skipping while the first character is a hash, and not increasing the line number.
 				if(!str_starts_with($line, "<?php")) {
-					throw new \Exception("Logic file at " . $this->path . " must start by opening a PHP tag. See https://www.php.gt/routing/logic-stream-wrapper");
+					throw new Exception("Logic file at " . $this->path . " must start by opening a PHP tag. See https://www.php.gt/routing/logic-stream-wrapper");
 				}
 			}
 			$trimmedLine = trim($line);
@@ -74,7 +75,7 @@ class LogicStreamWrapper {
 			}
 
 			if($withinBlockComment) {
-				if(strstr($trimmedLine, "*/")) {
+				if(str_contains($trimmedLine, "*/")) {
 					$withinBlockComment = false;
 				}
 			}
