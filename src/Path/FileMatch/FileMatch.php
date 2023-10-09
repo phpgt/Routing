@@ -83,7 +83,7 @@ abstract class FileMatch {
 			$filePathPart = $filePathParts[$i];
 
 // On the last iteration, don't convert if there's a sibling match.
-			if(!isset($filePathParts[$i + 1]) && !$matchingSibling) {
+			if(isset($filePathParts[$i + 1]) || !$matchingSibling) {
 				if($filePathPart === "@") {
 					$uriPathParts[$i] = "@";
 				}
