@@ -90,4 +90,17 @@ class BasicFileMatchTest extends TestCase {
 		self::assertTrue($sut->matches("/request/dynamic-example"));
 		self::assertFalse($sut->matches("/request/secrets"));
 	}
+
+	public function testMatches_nestedDynamicPath_siblingMatchesIndex():void {
+		$sut = new BasicFileMatch(
+			"page/request/@share-id/@request-id.html",
+			"page",
+			[
+				"page/request/@share-id/index.html",
+				"page/request/@share-id/secrets.html",
+			]
+		);
+		self::assertTrue($sut->matches("/request/share123/dynamic-example"));
+		self::assertFalse($sut->matches("/request/share123/secrets"));
+	}
 }
