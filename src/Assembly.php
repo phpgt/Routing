@@ -2,6 +2,7 @@
 namespace Gt\Routing;
 
 use Countable;
+use Gt\Routing\Path\FileMatch\MagicFileMatch;
 use Iterator;
 
 /** @implements Iterator<int, string> */
@@ -36,7 +37,8 @@ class Assembly implements Iterator, Countable {
 	public function containsDistinctFile():bool {
 		foreach($this->pathList as $path) {
 			$fileName = pathinfo($path, PATHINFO_FILENAME);
-			if($fileName[0] !== "_") {
+			if(!str_starts_with($fileName, "_")
+			|| !in_array($fileName, MagicFileMatch::MAGIC_FILENAME_ARRAY)) {
 				return true;
 			}
 		}

@@ -92,4 +92,18 @@ class AssemblyTest extends TestCase {
 
 		self::assertTrue($sut->containsDistinctFile());
 	}
+
+	public function testContainsDistinctFile_magicFilename():void {
+		$pathList = [
+			"/var/www/_header.html",
+			"/var/www/_new.html",
+			"/var/www/_footer.html",
+		];
+		$sut = new Assembly();
+		foreach($pathList as $path) {
+			$sut->add($path);
+		}
+
+		self::assertTrue($sut->containsDistinctFile());
+	}
 }

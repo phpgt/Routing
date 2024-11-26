@@ -73,13 +73,13 @@ abstract class FileMatch {
 		array $uriPathParts
 	):array {
 		$filePathParts = explode("/", $filePath);
-		$matchingSibling = in_array($uriPathParts, $this->siblingFilePathParts);
 
 		foreach($uriPathParts as $i => $uriPathPart) {
 			if(!isset($filePathParts[$i])) {
 				break;
 			}
 
+			$matchingSibling = in_array($uriPathParts, $this->siblingFilePathParts);
 			$filePathPart = $filePathParts[$i];
 
 // On the last iteration, don't convert if there's a sibling match.
