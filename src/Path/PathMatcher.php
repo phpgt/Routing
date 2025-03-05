@@ -8,7 +8,7 @@ class PathMatcher {
 
 	public function __construct(
 		private string $baseDirectory,
-		DirectoryExpander $expander = null
+		?DirectoryExpander $expander = null
 	) {
 		$this->expander = $expander ?? new DirectoryExpander();
 		$this->filterArray = [];

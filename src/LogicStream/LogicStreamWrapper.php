@@ -83,7 +83,7 @@ class LogicStreamWrapper {
 				if(str_starts_with($trimmedLine, "namespace")) {
 					$foundNamespace = true;
 				}
-				elseif($trimmedLine ) {
+				elseif($trimmedLine) {
 					$namespace = new LogicStreamNamespace(
 						$this->path,
 						self::NAMESPACE_PREFIX
