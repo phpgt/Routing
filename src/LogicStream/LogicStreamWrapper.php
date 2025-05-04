@@ -88,7 +88,7 @@ class LogicStreamWrapper {
 						$this->path,
 						self::NAMESPACE_PREFIX
 					);
-					$this->contents .= "namespace $namespace;\n\n";
+					$this->contents .= "namespace $namespace;\t";
 					$foundNamespace = true;
 				}
 			}
