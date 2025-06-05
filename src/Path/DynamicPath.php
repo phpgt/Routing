@@ -14,7 +14,7 @@ class DynamicPath {
 		$this->assemblyList = $assemblyList;
 	}
 
-	public function get(string $key = null, bool $extra = false):?string {
+	public function get(?string $key = null, ?bool $extra = false):?string {
 		$requestPathParts = explode("/", $this->requestPath);
 
 		foreach($this->assemblyList as $assembly) {
