@@ -14,10 +14,12 @@ use Gt\Http\ResponseStatusException\Redirection\HttpPermanentRedirect;
 use Gt\Http\ResponseStatusException\Redirection\HttpSeeOther;
 use Gt\Http\ResponseStatusException\Redirection\HttpTemporaryRedirect;
 use Gt\Http\Uri;
+use Gt\Routing\Assembly;
 use Gt\Routing\Method\Any;
 use Gt\Routing\Method\Get;
 use Gt\Routing\Method\Put;
 use Gt\Routing\BaseRouter;
+use Gt\Routing\NotYetRoutedException;
 use Gt\Routing\Redirects;
 use JetBrains\PhpStorm\Deprecated;
 use PHPUnit\Framework\TestCase;
@@ -285,6 +287,90 @@ class BaseRouterTest extends TestCase {
 			}
 		};
 		self::expectExceptionMessage("Route 1");
+		$sut->route($request);
+	}
+
+	public function testGetViewClass_null():void {
+		$sut = (new class extends BaseRouter {});
+		self::assertNull($sut->getViewClass());
+	}
+
+	public function testGetViewClass():void {
+		$sut = (new class extends BaseRouter {});
+		$viewClass = "TEST";
+		$sut->setViewClass($viewClass);
+		self::assertSame($viewClass, $sut->getViewClass());
+	}
+
+	public function testGetLogicAssembly_notYetRouted():void {
+		$logicAssembly = self::createMock(Assembly::class);
+		$sut = (new class(logicAssembly: $logicAssembly) extends BaseRouter {});
+		self::expectException(NotYetRoutedException::class);
+		$sut->getLogicAssembly();
+	}
+
+	public function testGetLogicAssembly():void {
+		$logicAssembly = self::createMock(Assembly::class);
+		$uri = self::createMock(Uri::class);
+		$uri->method("getPath")->willReturn("/");
+		$request = self::createMock(Request::class);
+		$request->method("getMethod")->willReturn("GET");
+		$request->method("getUri")->willReturn($uri);
+		$request->method("getHeaderLine")->willReturn("test/example");
+		$sut = (new class(logicAssembly: $logicAssembly) extends BaseRouter {
+			#[Any(name: "api-route", accept: "test/example")]
+			public function thisShouldBeRouted():void {
+			}
+		});
+		$sut->route($request);
+		self::assertSame($logicAssembly, $sut->getLogicAssembly());
+	}#
+
+	public function testGetViewAssembly():void {
+		$viewAssembly = self::createMock(Assembly::class);
+		$sut = (new class(viewAssembly: $viewAssembly) extends BaseRouter {});
+		self::assertSame($viewAssembly, $sut->getViewAssembly());
+	}
+
+	public function testAddToViewAssembly():void {
+		$viewAssembly = self::createMock(Assembly::class);
+		$viewAssembly->expects(self::once())
+			->method("add")
+			->with("example/view/path");
+		$sut = (new class(viewAssembly: $viewAssembly) extends BaseRouter {
+			#[Any(name: "api-route", accept: "test/example")]
+			public function thisShouldBeRouted():void {
+				$this->addToViewAssembly("example/view/path");
+			}
+		});
+
+		$uri = self::createMock(Uri::class);
+		$uri->method("getPath")->willReturn("/");
+		$request = self::createMock(Request::class);
+		$request->method("getMethod")->willReturn("GET");
+		$request->method("getUri")->willReturn($uri);
+		$request->method("getHeaderLine")->willReturn("test/example");
+		$sut->route($request);
+	}
+
+	public function testAddToLogicAssembly():void {
+		$logicAssembly = self::createMock(Assembly::class);
+		$logicAssembly->expects(self::once())
+			->method("add")
+			->with("example/logic/path");
+		$sut = (new class(logicAssembly: $logicAssembly) extends BaseRouter {
+			#[Any(name: "api-route", accept: "test/example")]
+			public function thisShouldBeRouted():void {
+				$this->addToLogicAssembly("example/logic/path");
+			}
+		});
+
+		$uri = self::createMock(Uri::class);
+		$uri->method("getPath")->willReturn("/");
+		$request = self::createMock(Request::class);
+		$request->method("getMethod")->willReturn("GET");
+		$request->method("getUri")->willReturn($uri);
+		$request->method("getHeaderLine")->willReturn("test/example");
 		$sut->route($request);
 	}
 

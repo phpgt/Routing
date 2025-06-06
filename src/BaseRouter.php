@@ -141,15 +141,9 @@ abstract class BaseRouter {
 		string $type,
 		string $path
 	):void {
-		$assembly = match($type) {
-			Assembly::TYPE_LOGIC => $this->logicAssembly,
-			Assembly::TYPE_VIEW => $this->viewAssembly,
-			default => null,
-		};
-
-		if(is_null($assembly)) {
-			return;
-		}
+		$assembly = ($type === Assembly::TYPE_LOGIC)
+			? $this->logicAssembly
+			: $this->viewAssembly;
 
 		$assembly->add($path);
 	}
