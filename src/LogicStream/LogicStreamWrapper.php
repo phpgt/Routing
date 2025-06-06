@@ -4,7 +4,10 @@ namespace Gt\Routing\LogicStream;
 use Exception;
 use SplFileObject;
 
-/** @SuppressWarnings(PHPMD.CamelCaseMethodName) */
+/**
+ * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+ * @phpcs:disable Generic.NamingConventions.CamelCapsFunctionName
+ */
 class LogicStreamWrapper {
 	const NAMESPACE_PREFIX = "Gt\\AppLogic";
 	const STREAM_NAME = "gt-logic-stream";
@@ -13,7 +16,7 @@ class LogicStreamWrapper {
 	private string $path;
 	private string $contents;
 
-	function stream_open(string $path):bool {
+	public function stream_open(string $path):bool {
 		$this->position = 0;
 		$this->path = substr($path, strpos($path, "//") + 2);
 		$this->contents = "";
@@ -21,17 +24,17 @@ class LogicStreamWrapper {
 		return true;
 	}
 
-	function stream_read(int $count):string {
+	public function stream_read(int $count):string {
 		$ret = substr($this->contents, $this->position, $count);
 		$this->position += strlen($ret);
 		return $ret;
 	}
 
-	function stream_tell():int {
+	public function stream_tell():int {
 		return $this->position;
 	}
 
-	function stream_eof():bool {
+	public function stream_eof():bool {
 		return $this->position >= strlen($this->contents);
 	}
 
@@ -64,9 +67,15 @@ class LogicStreamWrapper {
 			$line = $file->fgets();
 			if($lineNumber === 0) {
 // TODO: Allow hashbangs before <?php
-// Maybe this is possible by just skipping while the first character is a hash, and not increasing the line number.
+// Maybe this is possible by just skipping while the first character is a hash,
+// and not increasing the line number.
 				if(!str_starts_with($line, "<?php")) {
-					throw new Exception("Logic file at " . $this->path . " must start by opening a PHP tag. See https://www.php.gt/routing/logic-stream-wrapper");
+					throw new Exception(
+						"Logic file at "
+						. $this->path
+						. " must start by opening a PHP tag. "
+						. "See https://www.php.gt/routing/logic-stream-wrapper"
+					);
 				}
 			}
 			$trimmedLine = trim($line);

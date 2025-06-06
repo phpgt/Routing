@@ -10,7 +10,10 @@ class BasicFileMatch extends FileMatch {
 		$uriPath = trim($uriPath, "/");
 		$uriPathParts = explode("/", $uriPath);
 		$filePathTrimmed = $this->getTrimmedFilePath();
-		$uriPathParts = $this->filterDynamicPathParts($filePathTrimmed, $uriPathParts);
+		$uriPathParts = $this->filterDynamicPathParts(
+			$filePathTrimmed,
+			$uriPathParts,
+		);
 		$uriPath = implode("/", $uriPathParts);
 		$uriPathIndex = trim("$uriPath/index", "/");
 

@@ -29,7 +29,8 @@ class DynamicPath {
 					if(is_null($key)) {
 						if($extra) {
 							$test = "";
-							for($ppi = count($filePathParts), $len = count($requestPathParts); $ppi < $len; $ppi++) {
+							for($ppi = count($filePathParts), $len = count($requestPathParts);
+							$ppi < $len; $ppi++) {
 								$test .= $requestPathParts[$ppi];
 								$test .= "/";
 							}
