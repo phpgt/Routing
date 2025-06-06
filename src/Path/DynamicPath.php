@@ -20,9 +20,9 @@ class DynamicPath {
 		foreach($this->assemblyList as $assembly) {
 			foreach($assembly as $filePath) {
 				$filePathParts = explode("/", $filePath);
-				foreach($filePathParts as $i => $f) {
-					$f = strtok($f, ".");
-					if($f[0] !== "@") {
+				foreach($filePathParts as $i => $filePart) {
+					$filePart = strtok($filePart, ".");
+					if($filePart[0] !== "@") {
 						continue;
 					}
 
@@ -40,16 +40,16 @@ class DynamicPath {
 						}
 					}
 
-					if(ltrim($f, "@") !== $key) {
+					if(ltrim($filePart, "@") !== $key) {
 						continue;
 					}
 
-					$r = $requestPathParts[$i] ?? null;
-					if(!$r) {
+					$requestPart = $requestPathParts[$i] ?? null;
+					if(!$requestPart) {
 						continue;
 					}
 
-					return $r;
+					return $requestPart;
 				}
 			}
 		}

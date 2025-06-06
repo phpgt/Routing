@@ -4,6 +4,7 @@ namespace Gt\Routing\LogicStream;
 use Exception;
 use SplFileObject;
 
+/** @SuppressWarnings(PHPMD.CamelCaseMethodName) */
 class LogicStreamWrapper {
 	const NAMESPACE_PREFIX = "Gt\\AppLogic";
 	const STREAM_NAME = "gt-logic-stream";
