@@ -7,6 +7,7 @@ use Throwable;
 class RoutingException extends RuntimeException {
 	const DEFAULT_MESSAGE = "";
 
+	/** @phpcs:disable Generic.CodeAnalysis.UselessOverridingMethod */
 	public function __construct(
 		string $message = self::DEFAULT_MESSAGE,
 		int $code = 0,

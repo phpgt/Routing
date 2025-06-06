@@ -1,7 +1,17 @@
 <?php
 namespace Gt\Routing;
 
+use Gt\Routing\Method\Any;
+use Gt\Routing\Method\Connect;
+use Gt\Routing\Method\Delete;
+use Gt\Routing\Method\Get;
+use Gt\Routing\Method\Head;
 use Gt\Routing\Method\HttpMethodHandler;
+use Gt\Routing\Method\Options;
+use Gt\Routing\Method\Patch;
+use Gt\Routing\Method\Post;
+use Gt\Routing\Method\Put;
+use Gt\Routing\Method\Trace;
 use Gt\ServiceContainer\Container;
 use Gt\ServiceContainer\Injector;
 use Negotiation\Accept;
@@ -10,10 +20,16 @@ use ReflectionAttribute;
 use ReflectionMethod;
 use Gt\Routing\Method\HttpRouteMethod;
 
+
+/**
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @phpcs:disable Generic.Metrics.CyclomaticComplexity
+ */
 class RouterCallback {
 	private Container $container;
 	private Injector $injector;
 	private ContentNegotiator $contentNegotiator;
+	/** @phpstan-ignore-next-line */
 	private HttpMethodHandler $httpMethodHandler;
 
 	/** @param ReflectionAttribute<HttpRouteMethod> $attribute */
@@ -38,11 +54,26 @@ class RouterCallback {
 
 	public function isAllowedMethod(string $requestMethod):bool {
 		$methodsArgument = $this->attribute->getArguments()["methods"] ?? [];
-		return $this->httpMethodHandler->isAllowedMethod(
-			$requestMethod,
-			$this->attribute->getName(),
-			$methodsArgument
+
+		$allowedMethods = match($this->attribute->getName()) {
+			Any::class => HttpRoute::METHODS_ALL,
+			Connect::class => [HttpRoute::METHOD_CONNECT],
+			Delete::class => [HttpRoute::METHOD_DELETE],
+			Get::class => [HttpRoute::METHOD_GET],
+			Head::class => [HttpRoute::METHOD_HEAD],
+			Options::class => [HttpRoute::METHOD_OPTIONS],
+			Patch::class => [HttpRoute::METHOD_PATCH],
+			Post::class => [HttpRoute::METHOD_POST],
+			Put::class => [HttpRoute::METHOD_PUT],
+			Trace::class => [HttpRoute::METHOD_TRACE],
+			default => $methodsArgument,
+		};
+		$allowedMethods = array_map(
+			"strtoupper",
+			$allowedMethods
 		);
+
+		return in_array($requestMethod, $allowedMethods);
 	}
 
 	public function matchesPath(string $requestPath):bool {

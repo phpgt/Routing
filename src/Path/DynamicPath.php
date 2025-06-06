@@ -39,7 +39,12 @@ class DynamicPath {
 	 * @param bool|null $extra Whether to include extra path parts
 	 * @return string|null The matched parameter or null if no match
 	 */
-	private function processFilePathParts(array $filePathParts, array $requestPathParts, ?string $key, ?bool $extra): ?string {
+	private function processFilePathParts(
+		array $filePathParts,
+		array $requestPathParts,
+		?string $key,
+		?bool $extra,
+	): ?string {
 		foreach($filePathParts as $i => $filePart) {
 			$filePart = strtok($filePart, ".");
 			if($filePart[0] !== "@") {
@@ -67,7 +72,11 @@ class DynamicPath {
 	 * @param bool|null $extra Whether to include extra path parts
 	 * @return string|null The matched parameter
 	 */
-	private function handleNullKey(array $filePathParts, array $requestPathParts, ?bool $extra): ?string {
+	private function handleNullKey(
+		array $filePathParts,
+		array $requestPathParts,
+		?bool $extra,
+	): ?string {
 		if($extra) {
 			return $this->getExtraPathParts($filePathParts, $requestPathParts);
 		}
@@ -101,7 +110,12 @@ class DynamicPath {
 	 * @param string $key The key to look for
 	 * @return string|null The matched parameter or null if no match
 	 */
-	private function handleNamedKey(string $filePart, array $requestPathParts, int $i, string $key): ?string {
+	private function handleNamedKey(
+		string $filePart,
+		array $requestPathParts,
+		int $i,
+		string $key,
+	): ?string {
 		if(ltrim($filePart, "@") !== $key) {
 			return null;
 		}
