@@ -1,22 +1,21 @@
 <?php
 namespace Gt\Routing;
 
+use ArrayIterator;
 use Countable;
+use IteratorAggregate;
 use Gt\Routing\Path\FileMatch\MagicFileMatch;
-use Iterator;
 
-/** @implements Iterator<int, string> */
-class Assembly implements Iterator, Countable {
+/** @implements IteratorAggregate<int, string> */
+class Assembly implements IteratorAggregate, Countable {
 	const TYPE_LOGIC = "logic";
 	const TYPE_VIEW = "view";
 
 	/** @var string[] Ordered list of file paths to load. */
 	private array $pathList;
-	private int $iteratorIndex;
 
 	public function __construct() {
 		$this->pathList = [];
-		$this->iteratorIndex = 0;
 	}
 
 	public function add(string $path):void {
@@ -38,35 +37,19 @@ class Assembly implements Iterator, Countable {
 		foreach($this->pathList as $path) {
 			$fileName = pathinfo($path, PATHINFO_FILENAME);
 			if(!str_starts_with($fileName, "_")
-			|| !in_array($fileName, MagicFileMatch::MAGIC_FILENAME_ARRAY)) {
+				|| !in_array($fileName, MagicFileMatch::MAGIC_FILENAME_ARRAY)) {
 				return true;
 			}
 		}
-
 		return false;
 	}
 
-	public function current():string {
-		return $this->pathList[$this->iteratorIndex];
+	/** @return ArrayIterator<int, string> */
+	public function getIterator(): ArrayIterator {
+		return new ArrayIterator($this->pathList);
 	}
 
-	public function next():void {
-		$this->iteratorIndex++;
-	}
-
-	public function key():int {
-		return $this->iteratorIndex;
-	}
-
-	public function valid():bool {
-		return isset($this->pathList[$this->iteratorIndex]);
-	}
-
-	public function rewind():void {
-		$this->iteratorIndex = 0;
-	}
-
-	public function count():int {
+	public function count(): int {
 		return count($this->pathList);
 	}
 }

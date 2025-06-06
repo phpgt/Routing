@@ -57,56 +57,101 @@ class LogicStreamWrapper {
 	 * This function checks for a namespace declaration at the top of the
 	 * script, and if there is no declaration, it will inject one that
 	 * matches the current path.
+	 *
+	 * @SuppressWarnings(PHPMD.CyclomaticComplexity)
 	 */
 	private function loadContents(SplFileObject $file):void {
+		$this->processFileUntilNamespace($file);
+		$this->appendRemainingContents($file);
+	}
+
+	/**
+	 * Process the file until a namespace is found or added
+	 */
+	private function processFileUntilNamespace(SplFileObject $file): void {
 		$foundNamespace = false;
 		$withinBlockComment = false;
 		$lineNumber = 0;
 
 		while(!$file->eof() && !$foundNamespace) {
 			$line = $file->fgets();
+
 			if($lineNumber === 0) {
-// TODO: Allow hashbangs before <?php
-// Maybe this is possible by just skipping while the first character is a hash,
-// and not increasing the line number.
-				if(!str_starts_with($line, "<?php")) {
-					throw new Exception(
-						"Logic file at "
-						. $this->path
-						. " must start by opening a PHP tag. "
-						. "See https://www.php.gt/routing/logic-stream-wrapper"
-					);
-				}
+				$this->validateFirstLine($line);
 			}
+
 			$trimmedLine = trim($line);
+			$withinBlockComment = $this->handleBlockComment($trimmedLine, $withinBlockComment);
 
-			if(str_starts_with($trimmedLine, "/*")) {
-				$withinBlockComment = true;
-			}
-
-			if($withinBlockComment) {
-				if(str_contains($trimmedLine, "*/")) {
-					$withinBlockComment = false;
-				}
-			}
-			elseif($lineNumber > 0) {
-				if(str_starts_with($trimmedLine, "namespace")) {
-					$foundNamespace = true;
-				}
-				elseif($trimmedLine ) {
-					$namespace = new LogicStreamNamespace(
-						$this->path,
-						self::NAMESPACE_PREFIX
-					);
-					$this->contents .= "namespace $namespace;\t";
-					$foundNamespace = true;
-				}
+			if(!$withinBlockComment && $lineNumber > 0) {
+				$foundNamespace = $this->processNamespace($trimmedLine);
 			}
 
 			$this->contents .= $line;
 			$lineNumber++;
 		}
+	}
 
+	/**
+	 * Validate that the first line of the file starts with <?php
+	 */
+	private function validateFirstLine(string $line): void {
+		if(!str_starts_with($line, "<?php")) {
+			throw new Exception(
+				"Logic file at "
+				. $this->path
+				. " must start by opening a PHP tag. "
+				. "See https://www.php.gt/routing/logic-stream-wrapper"
+			);
+		}
+	}
+
+	/**
+	 * Handle block comments in the file
+	 *
+	 * @param string $trimmedLine The trimmed line to check
+	 * @param bool $withinBlockComment Whether we're currently within a block comment
+	 * @return bool Updated block comment status
+	 */
+	private function handleBlockComment(string $trimmedLine, bool $withinBlockComment): bool {
+		if(str_starts_with($trimmedLine, "/*")) {
+			$withinBlockComment = true;
+		}
+
+		if($withinBlockComment && str_contains($trimmedLine, "*/")) {
+			$withinBlockComment = false;
+		}
+
+		return $withinBlockComment;
+	}
+
+	/**
+	 * Process namespace declarations
+	 *
+	 * @param string $trimmedLine The trimmed line to check
+	 * @return bool Whether a namespace was found or added
+	 */
+	private function processNamespace(string $trimmedLine): bool {
+		if(str_starts_with($trimmedLine, "namespace")) {
+			return true;
+		}
+
+		if($trimmedLine) {
+			$namespace = new LogicStreamNamespace(
+				$this->path,
+				self::NAMESPACE_PREFIX
+			);
+			$this->contents .= "namespace $namespace;\t";
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Append the remaining contents of the file
+	 */
+	private function appendRemainingContents(SplFileObject $file): void {
 		while(!$file->eof()) {
 			$line = $file->fgets();
 			$this->contents .= $line;

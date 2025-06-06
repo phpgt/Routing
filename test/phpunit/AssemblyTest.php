@@ -4,6 +4,12 @@ namespace Gt\Routing\Test;
 use Gt\Routing\Assembly;
 use PHPUnit\Framework\TestCase;
 
+class TestAssembly extends Assembly {
+	public function containsDistinctFile(): bool {
+		return parent::containsDistinctFile();
+	}
+}
+
 class AssemblyTest extends TestCase {
 	public function testAdd():void {
 		$sut = new Assembly();
@@ -71,7 +77,7 @@ class AssemblyTest extends TestCase {
 			"/var/www/_header.html",
 			"/var/www/_footer.html",
 		];
-		$sut = new Assembly();
+		$sut = new TestAssembly();
 		foreach($pathList as $path) {
 			$sut->add($path);
 		}
@@ -85,7 +91,7 @@ class AssemblyTest extends TestCase {
 			"/var/www/index.html",
 			"/var/www/_footer.html",
 		];
-		$sut = new Assembly();
+		$sut = new TestAssembly();
 		foreach($pathList as $path) {
 			$sut->add($path);
 		}
@@ -99,7 +105,7 @@ class AssemblyTest extends TestCase {
 			"/var/www/_new.html",
 			"/var/www/_footer.html",
 		];
-		$sut = new Assembly();
+		$sut = new TestAssembly();
 		foreach($pathList as $path) {
 			$sut->add($path);
 		}
