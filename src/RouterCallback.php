@@ -42,9 +42,23 @@ class RouterCallback {
 	}
 
 	public function isAllowedMethod(string $requestMethod):bool {
-		$methodsArgument = $this->attribute->getArguments()["methods"] ?? [];
+		$allowedMethods = $this->getAllowedMethods();
+		$allowedMethods = $this->normalizeMethods($allowedMethods);
+		return $this->isMethodAllowed($requestMethod, $allowedMethods);
+	}
 
-		$allowedMethods = match($this->attribute->getName()) {
+	private function getAllowedMethods(): array {
+		$methodsArgument = $this->attribute->getArguments()["methods"] ?? [];
+		return $this->mapAttributeToMethods($this->attribute->getName(), $methodsArgument);
+	}
+
+	private function mapAttributeToMethods(string $attributeName, array $methodsArgument): array {
+		$attributeMethodMap = $this->getAttributeMethodMap();
+		return $attributeMethodMap[$attributeName] ?? $methodsArgument;
+	}
+
+	private function getAttributeMethodMap(): array {
+		return [
 			Any::class => HttpRoute::METHODS_ALL,
 			Connect::class => [HttpRoute::METHOD_CONNECT],
 			Delete::class => [HttpRoute::METHOD_DELETE],
@@ -55,14 +69,15 @@ class RouterCallback {
 			Post::class => [HttpRoute::METHOD_POST],
 			Put::class => [HttpRoute::METHOD_PUT],
 			Trace::class => [HttpRoute::METHOD_TRACE],
-			default => $methodsArgument,
-		};
-		$allowedMethods = array_map(
-			"strtoupper",
-			$allowedMethods
-		);
+		];
+	}
 
-		return in_array($requestMethod, $allowedMethods);
+	private function normalizeMethods(array $methods): array {
+		return array_map("strtoupper", $methods);
+	}
+
+	private function isMethodAllowed(string $requestMethod, array $allowedMethods): bool {
+		return in_array(strtoupper($requestMethod), $allowedMethods, true);
 	}
 
 	public function matchesPath(string $requestPath):bool {
