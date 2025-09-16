@@ -46,9 +46,18 @@ abstract class BaseRouter {
 		Redirects $redirects,
 		RequestInterface $request
 	):void {
-		$responseCode = $this->routerConfig?->getInt("redirect_response_code");
+		$uri = $request->getUri()->getPath();
 
-		$responseClass = match($responseCode) {
+		$redirectTarget = $this->findRedirectTarget($redirects, $uri);
+		if ($redirectTarget !== null) {
+			$responseClass = $this->determineResponseClass();
+			throw new $responseClass($redirectTarget);
+		}
+	}
+
+	private function determineResponseClass():string {
+		$responseCode = $this->routerConfig?->getInt("redirect_response_code");
+		return match ($responseCode) {
 			300 => HttpMultipleChoices::class,
 			301 => HttpMovedPermanently::class,
 			302 => HttpFound::class,
@@ -57,14 +66,16 @@ abstract class BaseRouter {
 			307 => HttpTemporaryRedirect::class,
 			default => HttpPermanentRedirect::class
 		};
+	}
 
-		$uri = $request->getUri()->getPath();
-
-		foreach($redirects as $old => $new) {
-			if($old === $uri) {
-				throw new $responseClass($new);
+	private function findRedirectTarget(Redirects $redirects, string $uri):?string {
+		foreach ($redirects as $old => $new) {
+			if ($old === $uri) {
+				return $new;
 			}
 		}
+
+		return null;
 	}
 
 	public function route(RequestInterface $request):void {
