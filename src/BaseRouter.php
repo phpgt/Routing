@@ -26,8 +26,8 @@ abstract class BaseRouter {
 
 	public function __construct(
 		protected ?ConfigSection $routerConfig = null,
-		Assembly $viewAssembly = null,
-		Assembly $logicAssembly = null,
+		?Assembly $viewAssembly = null,
+		?Assembly $logicAssembly = null,
 	) {
 		$this->viewAssembly = $viewAssembly ?? new Assembly();
 		$this->logicAssembly = $logicAssembly ?? new Assembly();
