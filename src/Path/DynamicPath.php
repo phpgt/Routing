@@ -20,6 +20,7 @@ class DynamicPath {
 		foreach($this->assemblyList as $assembly) {
 			foreach($assembly as $filePath) {
 				$filePathParts = explode("/", $filePath);
+
 				foreach($filePathParts as $i => $f) {
 					$f = strtok($f, ".");
 					if($f[0] !== "@") {
@@ -27,34 +28,52 @@ class DynamicPath {
 					}
 
 					if(is_null($key)) {
-						if($extra) {
-							$test = "";
-							for($ppi = count($filePathParts), $len = count($requestPathParts); $ppi < $len; $ppi++) {
-								$test .= $requestPathParts[$ppi];
-								$test .= "/";
-							}
-							return rtrim($test, "/");
-						}
-						else {
-							return $requestPathParts[count($filePathParts) - 1] ?? null;
-						}
+						return $this->handleNullKey(
+							$filePathParts,
+							$requestPathParts,
+							$extra,
+						);
 					}
 
-					if(ltrim($f, "@") !== $key) {
-						continue;
+					if($this->matchesKey($f, $key)) {
+						return $this->getMatchedKey(
+							$requestPathParts,
+							$i,
+						);
 					}
-
-					$r = $requestPathParts[$i] ?? null;
-					if(!$r) {
-						continue;
-					}
-
-					return $r;
 				}
 			}
 		}
 
 		return null;
+	}
+
+	private function handleNullKey(
+		array $filePathParts,
+		array $requestPathParts,
+		bool $extra,
+	):?string {
+		if($extra) {
+			return $this->getExtraPath($filePathParts, $requestPathParts);
+		}
+
+		return $requestPathParts[count($filePathParts) - 1] ?? null;
+	}
+
+	private function getExtraPath(array $filePathParts, array $requestPathParts):string {
+		$test = "";
+		for($ppi = count($filePathParts), $len = count($requestPathParts); $ppi < $len; $ppi++) {
+			$test .= $requestPathParts[$ppi] . "/";
+		}
+		return rtrim($test, "/");
+	}
+
+	private function matchesKey(string $placeholder, string $key):bool {
+		return ltrim($placeholder, "@") === $key;
+	}
+
+	private function getMatchedKey(array $requestPathParts, int $index):?string {
+		return $requestPathParts[$index] ?? null;
 	}
 
 	public function getUrl(string $viewBasePath):string {

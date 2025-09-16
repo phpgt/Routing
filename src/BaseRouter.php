@@ -16,6 +16,9 @@ use Gt\Http\ResponseStatusException\Redirection\HttpSeeOther;
 use Gt\Http\ResponseStatusException\Redirection\HttpTemporaryRedirect;
 use ReflectionClass;
 
+/**
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 abstract class BaseRouter {
 	private Assembly $viewAssembly;
 	private Assembly $logicAssembly;

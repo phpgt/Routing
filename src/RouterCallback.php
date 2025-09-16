@@ -19,6 +19,9 @@ use Gt\Routing\Method\Any;
 use Gt\Routing\Method\Get;
 use Gt\Routing\Method\Post;
 
+/**
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 class RouterCallback {
 	private Container $container;
 	private Injector $injector;

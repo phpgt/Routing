@@ -5,7 +5,10 @@ use Countable;
 use Gt\Routing\Path\FileMatch\MagicFileMatch;
 use Iterator;
 
-/** @implements Iterator<int, string> */
+/**
+ * @implements Iterator<int, string>
+ * @SuppressWarnings(PHPMD.TooManyPublicMethods)
+ */
 class Assembly implements Iterator, Countable {
 	const TYPE_LOGIC = "logic";
 	const TYPE_VIEW = "view";

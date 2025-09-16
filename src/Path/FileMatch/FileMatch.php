@@ -74,7 +74,7 @@ abstract class FileMatch {
 	):array {
 		$filePathParts = explode("/", $filePath);
 
-		foreach($uriPathParts as $i => $uriPathPart) {
+		foreach(array_keys($uriPathParts) as $i) {
 			if(!isset($filePathParts[$i])) {
 				break;
 			}
