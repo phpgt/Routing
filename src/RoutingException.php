@@ -7,6 +7,8 @@ use Throwable;
 class RoutingException extends RuntimeException {
 	const DEFAULT_MESSAGE = "";
 
+
+// phpcs:ignore
 	public function __construct(
 		string $message = self::DEFAULT_MESSAGE,
 		int $code = 0,
