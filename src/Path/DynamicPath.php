@@ -48,6 +48,10 @@ class DynamicPath {
 		return null;
 	}
 
+	/**
+	 * @param array<string> $filePathParts
+	 * @param array<string> $requestPathParts
+	 */
 	private function handleNullKey(
 		array $filePathParts,
 		array $requestPathParts,
@@ -60,7 +64,14 @@ class DynamicPath {
 		return $requestPathParts[count($filePathParts) - 1] ?? null;
 	}
 
-	private function getExtraPath(array $filePathParts, array $requestPathParts):string {
+	/**
+	 * @param array<string> $filePathParts
+	 * @param array<string> $requestPathParts
+	 */
+	private function getExtraPath(
+		array $filePathParts,
+		array $requestPathParts,
+	):string {
 		$test = "";
 		for($ppi = count($filePathParts), $len = count($requestPathParts); $ppi < $len; $ppi++) {
 			$test .= $requestPathParts[$ppi] . "/";
@@ -72,7 +83,11 @@ class DynamicPath {
 		return ltrim($placeholder, "@") === $key;
 	}
 
-	private function getMatchedKey(array $requestPathParts, int $index):?string {
+	/** @param array<string> $requestPathParts */
+	private function getMatchedKey(
+		array $requestPathParts,
+		int $index,
+	):?string {
 		return $requestPathParts[$index] ?? null;
 	}
 

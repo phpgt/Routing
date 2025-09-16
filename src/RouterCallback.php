@@ -50,17 +50,26 @@ class RouterCallback {
 		return $this->isMethodAllowed($requestMethod, $allowedMethods);
 	}
 
-	private function getAllowedMethods(): array {
+	/** @return array<string> */
+	private function getAllowedMethods():array {
 		$methodsArgument = $this->attribute->getArguments()["methods"] ?? [];
 		return $this->mapAttributeToMethods($this->attribute->getName(), $methodsArgument);
 	}
 
-	private function mapAttributeToMethods(string $attributeName, array $methodsArgument): array {
+	/**
+	 * @param array<string> $methodsArgument
+	 * @return array<string>
+	 */
+	private function mapAttributeToMethods(
+		string $attributeName,
+		array $methodsArgument,
+	):array {
 		$attributeMethodMap = $this->getAttributeMethodMap();
 		return $attributeMethodMap[$attributeName] ?? $methodsArgument;
 	}
 
-	private function getAttributeMethodMap(): array {
+	/** @return array<class-string, array<string>> */
+	private function getAttributeMethodMap():array {
 		return [
 			Any::class => HttpRoute::METHODS_ALL,
 			Connect::class => [HttpRoute::METHOD_CONNECT],
@@ -75,11 +84,21 @@ class RouterCallback {
 		];
 	}
 
-	private function normalizeMethods(array $methods): array {
+	/**
+	 * @param array<string> $methods
+	 * @return array<string>
+	 */
+	private function normalizeMethods(array $methods):array {
 		return array_map("strtoupper", $methods);
 	}
 
-	private function isMethodAllowed(string $requestMethod, array $allowedMethods): bool {
+	/**
+	 * @param array<string> $allowedMethods
+	 */
+	private function isMethodAllowed(
+		string $requestMethod,
+		array $allowedMethods,
+	):bool {
 		return in_array(strtoupper($requestMethod), $allowedMethods, true);
 	}
 
