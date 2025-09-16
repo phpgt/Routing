@@ -18,7 +18,7 @@ class Redirects implements Iterator {
 		$this->redirectData = [];
 
 		while(!$file->eof()) {
-			$row = $file->fgetcsv();
+			$row = $file->fgetcsv(escape: "\\");
 			if(!isset($row[1])) {
 				continue;
 			}

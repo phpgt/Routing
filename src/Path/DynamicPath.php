@@ -36,10 +36,14 @@ class DynamicPath {
 					}
 
 					if($this->matchesKey($f, $key)) {
-						return $this->getMatchedKey(
+						$matchedKey = $this->getMatchedKey(
 							$requestPathParts,
 							$i,
 						);
+						if(!$matchedKey) {
+							continue;
+						}
+						return $matchedKey;
 					}
 				}
 			}
@@ -88,7 +92,11 @@ class DynamicPath {
 		array $requestPathParts,
 		int $index,
 	):?string {
-		return $requestPathParts[$index] ?? null;
+		$matchedKey = $requestPathParts[$index] ?? null;
+		if(!$matchedKey) {
+			return null;
+		}
+		return $matchedKey;
 	}
 
 	public function getUrl(string $viewBasePath):string {

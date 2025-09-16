@@ -17,9 +17,9 @@ class RedirectsTest extends TestCase {
 
 	public function testIterate():void {
 		$file = new SplFileObject("php://memory", "w");
-		$file->fputcsv(["from1", "to1"]);
-		$file->fputcsv(["from2", "to2"]);
-		$file->fputcsv(["from3", "to3"]);
+		$file->fputcsv(["from1", "to1"], escape: "\\");
+		$file->fputcsv(["from2", "to2"], escape: "\\");
+		$file->fputcsv(["from3", "to3"], escape: "\\");
 
 		$sut = new Redirects($file);
 		$i = 0;
