@@ -120,13 +120,14 @@ class LogicStreamWrapper {
 		string $originalLine,
 	):bool {
 		if($lineNumber > 0) {
-			if(str_starts_with($line, "namespace")) {
+			if(str_contains($line, "\tnamespace")) {
 				$this->contents .= $originalLine;
 				return true;
 			}
+
 			if($line) {
 				$namespace = new LogicStreamNamespace($this->path, self::NAMESPACE_PREFIX);
-				$this->contents .= "namespace $namespace;\t";
+				$this->contents .= "namespace $namespace;\n$originalLine\t";
 				return true;
 			}
 		}
