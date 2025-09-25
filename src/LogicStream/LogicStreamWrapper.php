@@ -16,7 +16,7 @@ class LogicStreamWrapper {
 	private string $contents;
 
 	// phpcs:ignore Generic.NamingConventions.CamelCapsFunctionName
-	function stream_open(string $path):bool {
+	public function stream_open(string $path):bool {
 		$this->position = 0;
 		$this->path = substr($path, strpos($path, "//") + 2);
 		$this->contents = "";
@@ -25,19 +25,19 @@ class LogicStreamWrapper {
 	}
 
 	// phpcs:ignore Generic.NamingConventions.CamelCapsFunctionName
-	function stream_read(int $count):string {
+	public function stream_read(int $count):string {
 		$ret = substr($this->contents, $this->position, $count);
 		$this->position += strlen($ret);
 		return $ret;
 	}
 
 	// phpcs:ignore Generic.NamingConventions.CamelCapsFunctionName
-	function stream_tell():int {
+	public function stream_tell():int {
 		return $this->position;
 	}
 
 	// phpcs:ignore Generic.NamingConventions.CamelCapsFunctionName
-	function stream_eof():bool {
+	public function stream_eof():bool {
 		return $this->position >= strlen($this->contents);
 	}
 
@@ -126,8 +126,11 @@ class LogicStreamWrapper {
 			}
 
 			if($line) {
+				if($this->contents === "<?php\n") {
+					$this->contents = "<?php\t";
+				}
 				$namespace = new LogicStreamNamespace($this->path, self::NAMESPACE_PREFIX);
-				$this->contents .= "namespace $namespace;\n$originalLine\t";
+				$this->contents .= "namespace $namespace;\n$originalLine";
 				return true;
 			}
 		}
