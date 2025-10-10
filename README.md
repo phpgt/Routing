@@ -51,3 +51,9 @@ TODO List:
 + [ ] Take a RequestInterface and a project directory, and construct the appropriate Assembly objects - matching the URL path to directory paths, extracting dynamic paths where appropriate.
 
 [psr-7]: https://www.php-fig.org/psr/psr-7/
+
+# Proudly sponsored by
+
+[JetBrains Open Source sponsorship program](https://www.jetbrains.com/community/opensource/)
+
+[![JetBrains logo.](https://resources.jetbrains.com/storage/products/company/brand/logos/jetbrains.svg)](https://www.jetbrains.com/community/opensource/)
