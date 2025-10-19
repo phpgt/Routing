@@ -2,7 +2,6 @@
 namespace Gt\Routing\Test;
 
 use Exception;
-use Gt\Config\ConfigSection;
 use Gt\Http\Request;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotAcceptable;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotFound;
@@ -19,6 +18,7 @@ use Gt\Routing\Method\Get;
 use Gt\Routing\Method\Put;
 use Gt\Routing\BaseRouter;
 use Gt\Routing\Redirects;
+use Gt\Routing\RouterConfig;
 use JetBrains\PhpStorm\Deprecated;
 use PHPUnit\Framework\TestCase;
 use Throwable;
@@ -293,10 +293,7 @@ class BaseRouterTest extends TestCase {
 		int $code,
 		string $redirectClass
 	):void {
-		$config = self::createMock(ConfigSection::class);
-		$config->method("getInt")
-			->with("redirect_response_code")
-			->willReturnOnConsecutiveCalls($code);
+		$config = new RouterConfig($code, "text/html");
 
 		$uri = self::createMock(Uri::class);
 		$uri->method("getPath")->willReturn("/old-path");

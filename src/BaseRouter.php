@@ -20,6 +20,7 @@ use ReflectionClass;
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 abstract class BaseRouter {
+	private ?RouterConfig $config;
 	private Assembly $viewAssembly;
 	private Assembly $logicAssembly;
 	private Container $container;
@@ -28,10 +29,26 @@ abstract class BaseRouter {
 	private bool $routeCompleted;
 
 	public function __construct(
-		protected ?ConfigSection $routerConfig = null,
+		null|ConfigSection|RouterConfig $routerConfig = null,
 		?Assembly $viewAssembly = null,
 		?Assembly $logicAssembly = null,
 	) {
+		if($routerConfig instanceof ConfigSection) {
+			trigger_deprecation(
+				"phpgt/routing",
+				"1.1.4",
+				"Using ConfigSection type will be removed in a future release - use RouterConfig instead for type safety"
+			);
+
+			$this->config = new RouterConfig(
+				$routerConfig->getInt("redirect_response_code"),
+				$routerConfig->getString("default_content_type"),
+			);
+		}
+		else {
+			$this->config = $routerConfig;
+		}
+
 		$this->viewAssembly = $viewAssembly ?? new Assembly();
 		$this->logicAssembly = $logicAssembly ?? new Assembly();
 		$this->routeCompleted = false;
@@ -59,7 +76,8 @@ abstract class BaseRouter {
 	}
 
 	private function determineResponseClass():string {
-		$responseCode = $this->routerConfig?->getInt("redirect_response_code");
+		$responseCode = $this->config->redirectResponseCode;
+
 		return match ($responseCode) {
 			300 => HttpMultipleChoices::class,
 			301 => HttpMovedPermanently::class,
