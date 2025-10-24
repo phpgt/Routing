@@ -27,11 +27,13 @@ abstract class BaseRouter {
 	private Injector $injector;
 	private string $viewClassName;
 	private bool $routeCompleted;
+	protected ?int $errorStatus;
 
 	public function __construct(
 		null|ConfigSection|RouterConfig $routerConfig = null,
 		?Assembly $viewAssembly = null,
 		?Assembly $logicAssembly = null,
+		?int $errorStatus = null,
 	) {
 		if($routerConfig instanceof ConfigSection) {
 			trigger_deprecation(
@@ -52,6 +54,7 @@ abstract class BaseRouter {
 		$this->viewAssembly = $viewAssembly ?? new Assembly();
 		$this->logicAssembly = $logicAssembly ?? new Assembly();
 		$this->routeCompleted = false;
+		$this->errorStatus = $errorStatus;
 	}
 
 	public function setContainer(Container $container):void {
