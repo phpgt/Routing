@@ -2,7 +2,6 @@
 namespace Gt\Routing\LogicStream;
 
 use Exception;
-use ReflectionClass;
 use SplFileObject;
 
 /**
@@ -16,12 +15,11 @@ class LogicStreamWrapper {
 	private string $path;
 	private string $contents;
 	private bool $namespaceInjected;
-	/** @var array<string, true> */
-	private array $internalClassMap;
+	private InternalClassNamePrefixer $internalClassNamePrefixer;
 	public mixed $context;
 
 	public function __construct() {
-		$this->internalClassMap = $this->buildInternalClassMap();
+		$this->internalClassNamePrefixer = new InternalClassNamePrefixer();
 	}
 
 	// phpcs:ignore Generic.NamingConventions.CamelCapsFunctionName
@@ -32,7 +30,7 @@ class LogicStreamWrapper {
 		$this->namespaceInjected = false;
 		$this->loadContents(new SplFileObject($this->path, "r"));
 		if($this->namespaceInjected) {
-			$this->contents = $this->prefixInternalClassNames($this->contents);
+			$this->contents = $this->internalClassNamePrefixer->prefix($this->contents);
 		}
 		return true;
 	}
@@ -160,217 +158,5 @@ class LogicStreamWrapper {
 		while(!$file->eof()) {
 			$this->contents .= $file->fgets();
 		}
-	}
-
-	/**
-	 * @return array<string, true>
-	 */
-	private function buildInternalClassMap():array {
-		$map = [];
-		foreach(get_declared_classes() as $className) {
-			$reflectionClass = new ReflectionClass($className);
-			if(!$reflectionClass->isInternal()) {
-				continue;
-			}
-
-			$map[strtolower($reflectionClass->getShortName())] = true;
-		}
-
-		return $map;
-	}
-
-	private function prefixInternalClassNames(string $code):string {
-		$tokens = \PhpToken::tokenize($code);
-		$imports = $this->parseUseImports($tokens);
-
-		$output = "";
-		$expectClassName = false;
-		$expectTypeName = false;
-		$inUseStatement = false;
-		$topLevelBraceDepth = 0;
-		$tokenCount = count($tokens);
-
-		for($i = 0; $i < $tokenCount; $i++) {
-			$token = $tokens[$i];
-
-			if($token->text === "{") {
-				$topLevelBraceDepth++;
-			}
-			elseif($token->text === "}") {
-				$topLevelBraceDepth = max(0, $topLevelBraceDepth - 1);
-			}
-
-			if($token->id === T_USE && $topLevelBraceDepth === 0) {
-				$inUseStatement = true;
-				$output .= $token->text;
-				continue;
-			}
-			if($inUseStatement) {
-				$output .= $token->text;
-				if($token->text === ";") {
-					$inUseStatement = false;
-				}
-				continue;
-			}
-
-			if(in_array($token->id, [T_NEW, T_INSTANCEOF, T_EXTENDS, T_IMPLEMENTS, T_CATCH], true)) {
-				$expectClassName = true;
-				$output .= $token->text;
-				continue;
-			}
-
-			if($token->id === T_DOUBLE_COLON) {
-				$expectClassName = false;
-				$expectTypeName = false;
-				$output .= $token->text;
-				continue;
-			}
-
-			if(in_array($token->text, [":", "|", "&", "?", ","], true)) {
-				$expectTypeName = true;
-				$output .= $token->text;
-				continue;
-			}
-
-			if($token->id === T_VARIABLE || $token->text === ")" || $token->text === "=") {
-				$expectTypeName = false;
-			}
-
-			if($this->shouldPrefixToken($tokens, $i, $expectClassName, $expectTypeName, $imports)) {
-				$output .= "\\" . $token->text;
-			}
-			else {
-				$output .= $token->text;
-			}
-
-			if($expectClassName && ($token->id === T_STRING || $token->id === T_NAME_QUALIFIED)) {
-				$expectClassName = false;
-			}
-		}
-
-		return $output;
-	}
-
-	/**
-	 * @param array<int, \PhpToken> $tokens
-	 * @param array<string, true> $imports
-	 */
-	private function shouldPrefixToken(
-		array $tokens,
-		int $tokenIndex,
-		bool $expectClassName,
-		bool $expectTypeName,
-		array $imports,
-	):bool {
-		$token = $tokens[$tokenIndex];
-		if($token->id !== T_STRING && $token->id !== T_NAME_QUALIFIED) {
-			return false;
-		}
-
-		if(!$expectClassName && !$expectTypeName && !$this->isStaticClassReference($tokens, $tokenIndex)) {
-			return false;
-		}
-
-		if(str_contains($token->text, "\\")) {
-			return false;
-		}
-
-		$shortName = strtolower($token->text);
-		if(!isset($this->internalClassMap[$shortName])) {
-			return false;
-		}
-		if(isset($imports[$shortName])) {
-			return false;
-		}
-		if($this->hasNamespaceSeparatorPrefix($tokens, $tokenIndex)) {
-			return false;
-		}
-
-		return true;
-	}
-
-	/**
-	 * @param array<int, \PhpToken> $tokens
-	 */
-	private function isStaticClassReference(array $tokens, int $tokenIndex):bool {
-		for($i = $tokenIndex + 1; isset($tokens[$i]); $i++) {
-			if(in_array($tokens[$i]->id, [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)) {
-				continue;
-			}
-
-			return $tokens[$i]->id === T_DOUBLE_COLON;
-		}
-
-		return false;
-	}
-
-	/**
-	 * @param array<int, \PhpToken> $tokens
-	 */
-	private function hasNamespaceSeparatorPrefix(array $tokens, int $tokenIndex):bool {
-		for($i = $tokenIndex - 1; $i >= 0; $i--) {
-			if(in_array($tokens[$i]->id, [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)) {
-				continue;
-			}
-
-			return $tokens[$i]->id === T_NS_SEPARATOR;
-		}
-
-		return false;
-	}
-
-	/**
-	 * @param array<int, \PhpToken> $tokens
-	 * @return array<string, true>
-	 */
-	private function parseUseImports(array $tokens):array {
-		$imports = [];
-		$topLevelBraceDepth = 0;
-		$tokenCount = count($tokens);
-
-		for($i = 0; $i < $tokenCount; $i++) {
-			$token = $tokens[$i];
-			if($token->text === "{") {
-				$topLevelBraceDepth++;
-			}
-			elseif($token->text === "}") {
-				$topLevelBraceDepth = max(0, $topLevelBraceDepth - 1);
-			}
-
-			if($token->id !== T_USE || $topLevelBraceDepth !== 0) {
-				continue;
-			}
-
-			$importName = "";
-			$alias = "";
-			$inAlias = false;
-			for($j = $i + 1; isset($tokens[$j]); $j++) {
-				$next = $tokens[$j];
-				if($next->text === ";") {
-					break;
-				}
-
-				if($next->id === T_AS) {
-					$inAlias = true;
-					continue;
-				}
-
-				if($next->id === T_STRING || $next->id === T_NAME_QUALIFIED || $next->id === T_NS_SEPARATOR) {
-					if($inAlias) {
-						$alias .= $next->text;
-					}
-					else {
-						$importName .= $next->text;
-					}
-				}
-			}
-
-			$shortName = strtolower($alias ?: preg_replace('/^.*\\\\/', "", $importName));
-			if($shortName) {
-				$imports[$shortName] = true;
-			}
-		}
-
-		return $imports;
 	}
 }
