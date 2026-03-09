@@ -14,13 +14,24 @@ class LogicStreamWrapper {
 	private int $position;
 	private string $path;
 	private string $contents;
+	private bool $namespaceInjected;
+	private InternalClassNamePrefixer $internalClassNamePrefixer;
+	public mixed $context;
+
+	public function __construct() {
+		$this->internalClassNamePrefixer = new InternalClassNamePrefixer();
+	}
 
 	// phpcs:ignore Generic.NamingConventions.CamelCapsFunctionName
 	public function stream_open(string $path):bool {
 		$this->position = 0;
 		$this->path = substr($path, strpos($path, "//") + 2);
 		$this->contents = "";
+		$this->namespaceInjected = false;
 		$this->loadContents(new SplFileObject($this->path, "r"));
+		if($this->namespaceInjected) {
+			$this->contents = $this->internalClassNamePrefixer->prefix($this->contents);
+		}
 		return true;
 	}
 
@@ -65,11 +76,14 @@ class LogicStreamWrapper {
 	 */
 	private function loadContents(SplFileObject $file):void {
 		$foundNamespace = false;
+		$withinBlockComment = false;
+		$lineNumber = 0;
 		$this->initFileParsing($file);
 
 		while(!$file->eof() && !$foundNamespace) {
 			$line = $file->fgets();
-			$foundNamespace = $this->processLine($line);
+			$lineNumber++;
+			$foundNamespace = $this->processLine($line, $lineNumber, $withinBlockComment);
 		}
 
 		// Append the remaining file content
@@ -87,12 +101,12 @@ class LogicStreamWrapper {
 		$this->contents .= $line;
 	}
 
-	private function processLine(string $line):bool {
-		static $withinBlockComment = false;
-		static $lineNumber = 0;
-
+	private function processLine(
+		string $line,
+		int $lineNumber,
+		bool &$withinBlockComment,
+	):bool {
 		$trimmedLine = trim($line);
-		$lineNumber++;
 
 		if($this->startsBlockComment($trimmedLine)) {
 			$withinBlockComment = true;
@@ -130,6 +144,7 @@ class LogicStreamWrapper {
 					$this->contents = "<?php\t";
 				}
 				$namespace = new LogicStreamNamespace($this->path, self::NAMESPACE_PREFIX);
+				$this->namespaceInjected = true;
 				$this->contents .= "namespace $namespace;\n$originalLine";
 				return true;
 			}
