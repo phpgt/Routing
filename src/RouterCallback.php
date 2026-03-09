@@ -1,23 +1,23 @@
 <?php
-namespace Gt\Routing;
+namespace GT\Routing;
 
-use Gt\Routing\Method\Connect;
-use Gt\Routing\Method\Delete;
-use Gt\Routing\Method\Head;
-use Gt\Routing\Method\Options;
-use Gt\Routing\Method\Patch;
-use Gt\Routing\Method\Put;
-use Gt\Routing\Method\Trace;
+use GT\Routing\Method\Connect;
+use GT\Routing\Method\Delete;
+use GT\Routing\Method\Head;
+use GT\Routing\Method\Options;
+use GT\Routing\Method\Patch;
+use GT\Routing\Method\Put;
+use GT\Routing\Method\Trace;
 use Gt\ServiceContainer\Container;
 use Gt\ServiceContainer\Injector;
 use Negotiation\Accept;
 use Negotiation\Negotiator;
 use ReflectionAttribute;
 use ReflectionMethod;
-use Gt\Routing\Method\HttpRouteMethod;
-use Gt\Routing\Method\Any;
-use Gt\Routing\Method\Get;
-use Gt\Routing\Method\Post;
+use GT\Routing\Method\HttpRouteMethod;
+use GT\Routing\Method\Any;
+use GT\Routing\Method\Get;
+use GT\Routing\Method\Post;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)

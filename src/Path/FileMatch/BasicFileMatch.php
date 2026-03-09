@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Routing\Path\FileMatch;
+namespace GT\Routing\Path\FileMatch;
 
 /**
  * A "Basic" FileMatch is one that directly matches a Uri path to a

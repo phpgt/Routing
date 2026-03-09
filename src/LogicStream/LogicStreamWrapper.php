@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Routing\LogicStream;
+namespace GT\Routing\LogicStream;
 
 use Exception;
 use SplFileObject;
@@ -8,7 +8,7 @@ use SplFileObject;
  * @SuppressWarnings(PHPMD.CamelCaseMethodName)
  */
 class LogicStreamWrapper {
-	const NAMESPACE_PREFIX = "Gt\\AppLogic";
+	const NAMESPACE_PREFIX = "GT\AppLogic";
 	const STREAM_NAME = "gt-logic-stream";
 
 	private int $position;

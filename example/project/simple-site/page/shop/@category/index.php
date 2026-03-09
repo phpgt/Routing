@@ -1,5 +1,5 @@
 <?php
-use Gt\Routing\Path\DynamicPath;
+use GT\Routing\Path\DynamicPath;
 
 function go(DynamicPath $dynamicPath) {
 	echo "Category index GO! - category name: ", $dynamicPath->get("category"), PHP_EOL;

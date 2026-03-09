@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Routing;
+namespace GT\Routing;
 
 use Gt\Config\ConfigSection;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotAcceptable;

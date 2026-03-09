@@ -1,9 +1,9 @@
 <?php
-namespace Gt\Routing\Test\Path;
+namespace GT\Routing\Test\Path;
 
 use Generator;
-use Gt\Routing\Path\DirectoryExpander;
-use Gt\Routing\Path\PathMatcher;
+use GT\Routing\Path\DirectoryExpander;
+use GT\Routing\Path\PathMatcher;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SplFileObject;

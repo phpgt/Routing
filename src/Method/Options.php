@@ -1,8 +1,8 @@
 <?php
-namespace Gt\Routing\Method;
+namespace GT\Routing\Method;
 
 use Attribute;
-use Gt\Routing\HttpRoute;
+use GT\Routing\HttpRoute;
 
 /** @codeCoverageIgnore  */
 #[Attribute]

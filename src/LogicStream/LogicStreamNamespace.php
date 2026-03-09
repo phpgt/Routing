@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Routing\LogicStream;
+namespace GT\Routing\LogicStream;
 
 use Stringable;
 

@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Routing\LogicStream;
+namespace GT\Routing\LogicStream;
 
 /**
  * @phpstan-type PhpTokenTuple array{int, string, int}

@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Routing\Test;
+namespace GT\Routing\Test;
 
 use Exception;
 use Gt\Http\Request;
@@ -13,12 +13,12 @@ use Gt\Http\ResponseStatusException\Redirection\HttpPermanentRedirect;
 use Gt\Http\ResponseStatusException\Redirection\HttpSeeOther;
 use Gt\Http\ResponseStatusException\Redirection\HttpTemporaryRedirect;
 use Gt\Http\Uri;
-use Gt\Routing\Method\Any;
-use Gt\Routing\Method\Get;
-use Gt\Routing\Method\Put;
-use Gt\Routing\BaseRouter;
-use Gt\Routing\Redirects;
-use Gt\Routing\RouterConfig;
+use GT\Routing\Method\Any;
+use GT\Routing\Method\Get;
+use GT\Routing\Method\Put;
+use GT\Routing\BaseRouter;
+use GT\Routing\Redirects;
+use GT\Routing\RouterConfig;
 use JetBrains\PhpStorm\Deprecated;
 use PHPUnit\Framework\TestCase;
 use Throwable;

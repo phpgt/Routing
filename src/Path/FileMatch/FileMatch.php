@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Routing\Path\FileMatch;
+namespace GT\Routing\Path\FileMatch;
 
 abstract class FileMatch {
 	/** @var array<array<string>> An array of paths parts for the siblings of the file path */

@@ -1,7 +1,7 @@
 <?php
-namespace Gt\Routing\Path;
+namespace GT\Routing\Path;
 
-use Gt\Routing\Assembly;
+use GT\Routing\Assembly;
 
 class DynamicPath {
 	/** @var array<Assembly> */

@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Routing\Path;
+namespace GT\Routing\Path;
 
 class PathMatcher {
 	private DirectoryExpander $expander;

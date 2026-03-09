@@ -34,11 +34,13 @@
 
 	"autoload": {
 		"psr-4": {
+			"GT\\Routing\\": "./src",
 			"Gt\\Routing\\": "./src"
 		}
 	},
 	"autoload-dev": {
 		"psr-4": {
+			"GT\\Routing\\Test\\": "./test/phpunit",
 			"Gt\\Routing\\Test\\": "./test/phpunit"
 		}
 	},

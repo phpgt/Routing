@@ -1,7 +1,7 @@
 <?php
-namespace Gt\Routing\Test;
+namespace GT\Routing\Test;
 
-use Gt\Routing\Assembly;
+use GT\Routing\Assembly;
 use PHPUnit\Framework\TestCase;
 
 class AssemblyTest extends TestCase {

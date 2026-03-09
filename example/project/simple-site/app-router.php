@@ -2,12 +2,12 @@
 namespace App;
 
 use Gt\Http\Request;
-use Gt\Routing\Method\Any;
-use Gt\Routing\Method\Get;
-use Gt\Routing\Method\Post;
-use Gt\Routing\BaseRouter;
-use Gt\Routing\Path\PathMatcher;
-use Gt\Routing\Path\DynamicPath;
+use GT\Routing\Method\Any;
+use GT\Routing\Method\Get;
+use GT\Routing\Method\Post;
+use GT\Routing\BaseRouter;
+use GT\Routing\Path\PathMatcher;
+use GT\Routing\Path\DynamicPath;
 
 class AppRouter extends BaseRouter {
 	#[Any(name: "api-route", accept: "application/json,application/xml")]

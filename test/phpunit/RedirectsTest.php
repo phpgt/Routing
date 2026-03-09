@@ -1,7 +1,7 @@
 <?php
-namespace Gt\Routing\Test;
+namespace GT\Routing\Test;
 
-use Gt\Routing\Redirects;
+use GT\Routing\Redirects;
 use PHPUnit\Framework\TestCase;
 use SplFileObject;
 

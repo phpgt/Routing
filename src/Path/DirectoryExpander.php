@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Routing\Path;
+namespace GT\Routing\Path;
 
 use FilesystemIterator;
 use Generator;

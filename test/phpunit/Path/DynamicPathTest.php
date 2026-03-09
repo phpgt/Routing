@@ -1,8 +1,8 @@
 <?php
-namespace Gt\Routing\Test\Path;
+namespace GT\Routing\Test\Path;
 
-use Gt\Routing\Assembly;
-use Gt\Routing\Path\DynamicPath;
+use GT\Routing\Assembly;
+use GT\Routing\Path\DynamicPath;
 use PHPUnit\Framework\TestCase;
 
 class DynamicPathTest extends TestCase {

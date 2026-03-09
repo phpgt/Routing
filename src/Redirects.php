@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Routing;
+namespace GT\Routing;
 
 use Iterator;
 use SplFileObject;

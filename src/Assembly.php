@@ -1,8 +1,8 @@
 <?php
-namespace Gt\Routing;
+namespace GT\Routing;
 
 use Countable;
-use Gt\Routing\Path\FileMatch\MagicFileMatch;
+use GT\Routing\Path\FileMatch\MagicFileMatch;
 use Iterator;
 
 /**

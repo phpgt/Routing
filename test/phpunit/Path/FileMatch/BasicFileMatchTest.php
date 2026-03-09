@@ -1,8 +1,8 @@
 <?php
-namespace Gt\Routing\Test\Path\FileMatch;
+namespace GT\Routing\Test\Path\FileMatch;
 
-use Gt\Routing\Path\FileMatch\BasicFileMatch;
-use Gt\Routing\Path\FileMatch\FileMatch;
+use GT\Routing\Path\FileMatch\BasicFileMatch;
+use GT\Routing\Path\FileMatch\FileMatch;
 use PHPUnit\Framework\TestCase;
 
 class BasicFileMatchTest extends TestCase {

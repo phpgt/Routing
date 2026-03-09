@@ -1,8 +1,8 @@
 <?php
-namespace Gt\Routing\Test\LogicStream;
+namespace GT\Routing\Test\LogicStream;
 
 use DateTime;
-use Gt\Routing\LogicStream\LogicStreamWrapper;
+use GT\Routing\LogicStream\LogicStreamWrapper;
 use PHPUnit\Framework\TestCase;
 
 class LogicStreamWrapperTest extends TestCase {
@@ -30,7 +30,7 @@ class LogicStreamWrapperTest extends TestCase {
 		$sut->stream_open($logicPath);
 		self::assertSame(0, $sut->stream_tell());
 
-		$namespaceLine = "namespace Gt\\AppLogic\\\\tmp\\phpgt_routing_example_$uniqid;";
+		$namespaceLine = "namespace GT\AppLogic\\\\tmp\\phpgt_routing_example_$uniqid;";
 		$contentsWithNamespace = substr_replace($contents, "$namespaceLine\n", strpos($contents, "\n") + 1, 0);
 		$contentsWithNamespace = substr_replace($contentsWithNamespace, "\t", strpos($contentsWithNamespace, "\n"), 1);
 

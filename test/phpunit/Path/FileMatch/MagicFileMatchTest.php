@@ -1,7 +1,7 @@
 <?php
-namespace Gt\Routing\Test\Path\FileMatch;
+namespace GT\Routing\Test\Path\FileMatch;
 
-use Gt\Routing\Path\FileMatch\MagicFileMatch;
+use GT\Routing\Path\FileMatch\MagicFileMatch;
 use PHPUnit\Framework\TestCase;
 
 class MagicFileMatchTest extends TestCase {

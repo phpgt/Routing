@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Routing\Path\FileMatch;
+namespace GT\Routing\Path\FileMatch;
 
 class MagicFileMatch extends FileMatch {
 	const MAGIC_FILENAME_ARRAY = [

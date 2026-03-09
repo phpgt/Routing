@@ -1,5 +1,5 @@
 <?php
-namespace Gt\Routing;
+namespace GT\Routing;
 
 class RouterConfig {
 	public function __construct(
