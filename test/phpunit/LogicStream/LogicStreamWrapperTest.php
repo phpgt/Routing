@@ -1,6 +1,7 @@
 <?php
 namespace Gt\Routing\Test\LogicStream;
 
+use DateTime;
 use Gt\Routing\LogicStream\LogicStreamWrapper;
 use PHPUnit\Framework\TestCase;
 
@@ -60,5 +61,40 @@ class LogicStreamWrapperTest extends TestCase {
 			"// This is line 6",
 			explode("\n", $actualContents)[5],
 		);
+	}
+
+	public function testStreamOpen_runtimeCall_UnqualifiedBuiltInClass():void {
+		$uniqid = uniqid();
+		$tmpFile = "phpgt-routing-example-" . $uniqid;
+		$logicPath = "phpgt-test://$tmpFile";
+		$contents = <<<PHP
+		<?php
+		function example():DateTime {
+			return new DateTime();
+		}
+		PHP;
+		$cwd = getcwd();
+		chdir(sys_get_temp_dir());
+		file_put_contents($tmpFile, $contents);
+
+		try {
+			$sut = new LogicStreamWrapper();
+			$sut->stream_open($logicPath);
+			$wrappedContents = $sut->stream_read(4096);
+
+			eval(substr($wrappedContents, strlen("<?php")));
+			$namespace = preg_match('/namespace\\s+([^;]+);/', $wrappedContents, $matches)
+				? $matches[1]
+				: "";
+			$callable = $namespace . "\\example";
+
+			self::assertInstanceOf(DateTime::class, $callable());
+		}
+		finally {
+			if($cwd !== false) {
+				chdir($cwd);
+			}
+			unlink(sys_get_temp_dir() . "/" . $tmpFile);
+		}
 	}
 }
