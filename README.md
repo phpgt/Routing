@@ -16,10 +16,10 @@ When referring to Requests within this repository, we are always referring to a 
 <a href="https://github.com/PhpGt/Routing/actions" target="_blank">
 	<img src="https://badge.status.php.gt/routing-build.svg" alt="Build status" />
 </a>
-<a href="https://scrutinizer-ci.com/g/PhpGt/Routing" target="_blank">
+<a href="https://app.codacy.com/gh/PhpGt/Routing" target="_blank">
 	<img src="https://badge.status.php.gt/routing-quality.svg" alt="Code quality" />
 </a>
-<a href="https://scrutinizer-ci.com/g/PhpGt/Routing" target="_blank">
+<a href="https://app.codecov.io/gh/PhpGt/Routing" target="_blank">
 	<img src="https://badge.status.php.gt/routing-coverage.svg" alt="Code coverage" />
 </a>
 <a href="https://packagist.org/packages/PhpGt/Routing" target="_blank">
