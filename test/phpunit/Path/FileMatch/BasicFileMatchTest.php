@@ -2,10 +2,20 @@
 namespace GT\Routing\Test\Path\FileMatch;
 
 use GT\Routing\Path\FileMatch\BasicFileMatch;
-use GT\Routing\Path\FileMatch\FileMatch;
 use PHPUnit\Framework\TestCase;
 
 class BasicFileMatchTest extends TestCase {
+	/** @var array<string> */
+	private array $tempDirectoryList = [];
+
+	protected function tearDown():void {
+		foreach($this->tempDirectoryList as $directory) {
+			$this->deleteDirectory($directory);
+		}
+
+		$this->tempDirectoryList = [];
+	}
+
 	public function testMatches_notNested():void {
 		$sut = new BasicFileMatch(
 			"basedir/something/nested.txt",
@@ -102,5 +112,88 @@ class BasicFileMatchTest extends TestCase {
 		);
 		self::assertTrue($sut->matches("/request/share123/dynamic-example"));
 		self::assertFalse($sut->matches("/request/share123/secrets"));
+	}
+
+	public function testMatches_dynamicIndex_doesNotMatchStaticSiblingAtParentLevel():void {
+		$sut = new BasicFileMatch(
+			"page/site/@slug/@field/index.html",
+			"page",
+			[
+				"page/site/@slug/index.html",
+				"page/site/@slug/vnc.html",
+			]
+		);
+		self::assertFalse($sut->matches("/site/belper/vnc/"));
+	}
+
+	public function testMatches_dynamicIndex_discoversParentLevelStaticSiblingsFromDisk():void {
+		$baseDir = $this->createRouteFixture([
+			"site/@slug/index.html",
+			"site/@slug/vnc.html",
+			"site/@slug/@field/index.html",
+		]);
+
+		$sut = new BasicFileMatch(
+			"$baseDir/site/@slug/@field/index.html",
+			$baseDir
+		);
+
+		self::assertFalse($sut->matches("/site/belper/vnc/"));
+	}
+
+	public function testMatches_dynamicIndex_discoversParentLevelStaticSiblingsWithoutBlockingDynamicMatches():void {
+		$baseDir = $this->createRouteFixture([
+			"site/@slug/index.html",
+			"site/@slug/vnc.html",
+			"site/@slug/@field/index.html",
+		]);
+
+		$sut = new BasicFileMatch(
+			"$baseDir/site/@slug/@field/index.html",
+			$baseDir
+		);
+
+		self::assertTrue($sut->matches("/site/belper/FIELD_01KM41GW10FTYTJYRGSX/"));
+	}
+
+	/** @param array<string> $relativeFiles */
+	private function createRouteFixture(array $relativeFiles):string {
+		$baseDir = sys_get_temp_dir() . "/routing-basic-file-match-" . uniqid();
+		mkdir($baseDir, recursive: true);
+		$this->tempDirectoryList[] = $baseDir;
+
+		foreach($relativeFiles as $relativeFile) {
+			$absoluteFile = "$baseDir/$relativeFile";
+			$absoluteDir = dirname($absoluteFile);
+			if(!is_dir($absoluteDir)) {
+				mkdir($absoluteDir, recursive: true);
+			}
+
+			touch($absoluteFile);
+		}
+
+		return $baseDir;
+	}
+
+	private function deleteDirectory(string $directory):void {
+		if(!is_dir($directory)) {
+			return;
+		}
+
+		foreach(scandir($directory) ?: [] as $item) {
+			if($item === "." || $item === "..") {
+				continue;
+			}
+
+			$path = "$directory/$item";
+			if(is_dir($path)) {
+				$this->deleteDirectory($path);
+				continue;
+			}
+
+			unlink($path);
+		}
+
+		rmdir($directory);
 	}
 }
