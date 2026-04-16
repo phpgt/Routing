@@ -34,7 +34,10 @@ abstract class FileMatch {
 		}
 	}
 
-	/** @param null|array<string> $siblingFiles */
+	/**
+	 * @param null|array<string> $siblingFiles
+	 * @return array<string>
+	 */
 	private function getSiblingFiles(?array $siblingFiles):array {
 		if($siblingFiles !== null) {
 			return $siblingFiles;
