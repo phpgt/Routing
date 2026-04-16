@@ -58,6 +58,40 @@ class DynamicPathTest extends TestCase {
 		self::assertEquals("6T", $sut->get());
 	}
 
+	public function testGet_noKey_returnsRightMostDynamicPathPartAcrossMatches():void {
+		$assembly = self::createMock(Assembly::class);
+		$assembly->method("current")
+			->willReturnOnConsecutiveCalls(
+				"page/shop/@category/index.php",
+				"page/shop/@category/@itemName.php",
+			);
+		$assembly->method("valid")
+			->willReturn(
+				true,
+				true,
+				false,
+			);
+		$sut = new DynamicPath("/shop/OnePlus/6T", $assembly);
+		self::assertSame("6T", $sut->get());
+	}
+
+	public function testGet_noKey_returnsRightMostStandardDynamicPartBeforeExtraPart():void {
+		$assembly = self::createMock(Assembly::class);
+		$assembly->method("current")
+			->willReturnOnConsecutiveCalls(
+				"page/shop/@category/index.php",
+				"page/shop/@category/@@itemName.php",
+			);
+		$assembly->method("valid")
+			->willReturn(
+				true,
+				true,
+				false,
+			);
+		$sut = new DynamicPath("/shop/OnePlus/6T/64GB", $assembly);
+		self::assertSame("6T", $sut->get());
+	}
+
 	public function testGetUrl():void {
 		$viewAssembly = self::createMock(Assembly::class);
 		$viewAssembly->method("current")
