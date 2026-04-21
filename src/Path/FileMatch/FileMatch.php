@@ -11,11 +11,8 @@ abstract class FileMatch {
 		protected string $baseDir,
 		?array $siblingFiles = null,
 	) {
-		$dirname = dirname($this->filePath);
-		$ext = pathinfo($this->filePath, PATHINFO_EXTENSION);
-
 		$this->siblingFilePathParts = [];
-		foreach($siblingFiles ?? glob("$dirname/*.$ext") as $filePath) {
+		foreach($this->getSiblingFiles($siblingFiles) as $filePath) {
 			$filePathNoBaseDir = substr($filePath, strlen($this->baseDir . "/"));
 			$pathParts = explode("/", $filePathNoBaseDir);
 			foreach($pathParts as $i => $pathPart) {
@@ -35,6 +32,34 @@ abstract class FileMatch {
 				$pathParts,
 			);
 		}
+	}
+
+	/**
+	 * @param null|array<string> $siblingFiles
+	 * @return array<string>
+	 */
+	private function getSiblingFiles(?array $siblingFiles):array {
+		if($siblingFiles !== null) {
+			return $siblingFiles;
+		}
+
+		$dirname = dirname($this->filePath);
+		$ext = pathinfo($this->filePath, PATHINFO_EXTENSION);
+		$siblingFiles = glob("$dirname/*.$ext") ?: [];
+
+		if($this->shouldIncludeParentSiblingFiles()) {
+			$parentSiblingFiles = glob(dirname($dirname) . "/*.$ext") ?: [];
+			$siblingFiles = [...$siblingFiles, ...$parentSiblingFiles];
+		}
+
+		return array_values(array_unique($siblingFiles));
+	}
+
+	private function shouldIncludeParentSiblingFiles():bool {
+		$fileName = pathinfo($this->filePath, PATHINFO_FILENAME);
+		$directoryName = basename(dirname($this->filePath));
+		return $fileName === "index"
+			&& str_starts_with($directoryName, "@");
 	}
 
 	abstract public function matches(string $uriPath):bool;
@@ -82,8 +107,8 @@ abstract class FileMatch {
 			$matchingSibling = in_array($uriPathParts, $this->siblingFilePathParts);
 			$filePathPart = $filePathParts[$i];
 
-// On the last iteration, don't convert if there's a sibling match.
-			if(isset($filePathParts[$i + 1]) || !$matchingSibling) {
+// On the last request path iteration, don't convert if there's a sibling match.
+			if(isset($uriPathParts[$i + 1]) || !$matchingSibling) {
 				if($filePathPart === "@") {
 					$uriPathParts[$i] = "@";
 				}
