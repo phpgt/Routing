@@ -105,6 +105,9 @@ abstract class BaseRouter {
 	public function route(RequestInterface $request):void {
 		/** @var array<RouterCallback> $validCallbackArray */
 		$validCallbackArray = [];
+		$acceptHeader = $this->getEffectiveAcceptHeader(
+			$request->getHeaderLine("accept")
+		);
 // Find all callbacks that match the current request, filling the valid callback
 // array. Then, the "best" callback will be matched using content negotiation.
 		foreach($this->reflectRouterCallbacks() as $routerCallback) {
@@ -114,7 +117,7 @@ abstract class BaseRouter {
 			if(!$routerCallback->matchesPath($request->getUri()->getPath())) {
 				continue;
 			}
-			if(!$routerCallback->matchesAccept($request->getHeaderLine("accept"))) {
+			if(!$routerCallback->matchesAccept($acceptHeader)) {
 				continue;
 			}
 
@@ -122,7 +125,7 @@ abstract class BaseRouter {
 		}
 
 		$bestRouterCallback = $this->negotiateBestCallback(
-			$request,
+			$acceptHeader,
 			$validCallbackArray
 		);
 
@@ -224,7 +227,7 @@ abstract class BaseRouter {
 
 	/** @param array<RouterCallback> $callbackArray */
 	private function negotiateBestCallback(
-		RequestInterface $request,
+		string $acceptHeader,
 		array $callbackArray
 	):?RouterCallback {
 		$bestQuality = -1;
@@ -232,7 +235,7 @@ abstract class BaseRouter {
 		foreach($callbackArray as $callback) {
 			/** @var Accept|null $best */
 			$best = $callback->getBestNegotiation(
-				$request->getHeaderLine("accept")
+				$acceptHeader
 			);
 
 			$quality = $best?->getQuality() ?? 0;
@@ -245,5 +248,29 @@ abstract class BaseRouter {
 		}
 
 		return $bestCallback;
+	}
+
+	private function getEffectiveAcceptHeader(string $acceptHeader):string {
+		if(!$this->isWildcardOnlyAcceptHeader($acceptHeader)) {
+			return $acceptHeader;
+		}
+
+		return $this->config?->defaultContentType ?? $acceptHeader;
+	}
+
+	private function isWildcardOnlyAcceptHeader(string $acceptHeader):bool {
+		$acceptHeader = trim($acceptHeader);
+		if($acceptHeader === "") {
+			return true;
+		}
+
+		foreach(explode(",", $acceptHeader) as $acceptPart) {
+			$mediaType = trim(explode(";", $acceptPart, 2)[0]);
+			if($mediaType !== "*/*") {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }
