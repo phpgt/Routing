@@ -67,12 +67,14 @@ class InternalClassNamePrefixer {
 			return $this->tokenText($token);
 		}
 
+		$prefix = $this->shouldPrefixToken($tokens, $index, $token, $imports, $state);
 		$state->updateExpectations($token);
-		if(!$this->shouldPrefixToken($tokens, $index, $token, $imports, $state)) {
-			return $this->tokenText($token);
+
+		if($prefix) {
+			return "\\" . $this->tokenText($token);
 		}
 
-		return "\\" . $this->tokenText($token);
+		return $this->tokenText($token);
 	}
 
 	/**
