@@ -40,8 +40,7 @@
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"GT\\Routing\\Test\\": "./test/phpunit",
-			"Gt\\Routing\\Test\\": "./test/phpunit"
+			"GT\\Routing\\Test\\": "./test/phpunit"
 		}
 	},
 	"config": {

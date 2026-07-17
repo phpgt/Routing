@@ -5,7 +5,6 @@ use Gt\Config\ConfigSection;
 use Gt\Http\ResponseStatusException\ClientError\HttpNotAcceptable;
 use Gt\ServiceContainer\Container;
 use Gt\ServiceContainer\Injector;
-use Negotiation\Accept;
 use Psr\Http\Message\RequestInterface;
 use Gt\Http\ResponseStatusException\Redirection\HttpFound;
 use Gt\Http\ResponseStatusException\Redirection\HttpMovedPermanently;
@@ -103,11 +102,9 @@ abstract class BaseRouter {
 	}
 
 	public function route(RequestInterface $request):void {
-		/** @var array<RouterCallback> $validCallbackArray */
-		$validCallbackArray = [];
-		$acceptHeader = $this->getEffectiveAcceptHeader(
-			$request->getHeaderLine("accept")
-		);
+		$acceptHeader = $request->getHeaderLine("accept");
+		/** @var array<RouterCallback> $routeMatchingCallbackArray */
+		$routeMatchingCallbackArray = [];
 // Find all callbacks that match the current request, filling the valid callback
 // array. Then, the "best" callback will be matched using content negotiation.
 		foreach($this->reflectRouterCallbacks() as $routerCallback) {
@@ -117,16 +114,13 @@ abstract class BaseRouter {
 			if(!$routerCallback->matchesPath($request->getUri()->getPath())) {
 				continue;
 			}
-			if(!$routerCallback->matchesAccept($acceptHeader)) {
-				continue;
-			}
-
-			array_push($validCallbackArray, $routerCallback);
+			array_push($routeMatchingCallbackArray, $routerCallback);
 		}
 
-		$bestRouterCallback = $this->negotiateBestCallback(
+		$contentTypeNegotiator = new ContentTypeNegotiator($this->config);
+		$bestRouterCallback = $contentTypeNegotiator->negotiate(
 			$acceptHeader,
-			$validCallbackArray
+			$routeMatchingCallbackArray
 		);
 
 		if(!$bestRouterCallback) {
@@ -225,52 +219,4 @@ abstract class BaseRouter {
 		return $routerCallbackArray;
 	}
 
-	/** @param array<RouterCallback> $callbackArray */
-	private function negotiateBestCallback(
-		string $acceptHeader,
-		array $callbackArray
-	):?RouterCallback {
-		$bestQuality = -1;
-		$bestCallback = null;
-		foreach($callbackArray as $callback) {
-			/** @var Accept|null $best */
-			$best = $callback->getBestNegotiation(
-				$acceptHeader
-			);
-
-			$quality = $best?->getQuality() ?? 0;
-			if($quality <= $bestQuality) {
-				continue;
-			}
-
-			$bestQuality = $quality;
-			$bestCallback = $callback;
-		}
-
-		return $bestCallback;
-	}
-
-	private function getEffectiveAcceptHeader(string $acceptHeader):string {
-		if(!$this->isWildcardOnlyAcceptHeader($acceptHeader)) {
-			return $acceptHeader;
-		}
-
-		return $this->config?->defaultContentType ?? $acceptHeader;
-	}
-
-	private function isWildcardOnlyAcceptHeader(string $acceptHeader):bool {
-		$acceptHeader = trim($acceptHeader);
-		if($acceptHeader === "") {
-			return true;
-		}
-
-		foreach(explode(",", $acceptHeader) as $acceptPart) {
-			$mediaType = trim(explode(";", $acceptPart, 2)[0]);
-			if($mediaType !== "*/*") {
-				return false;
-			}
-		}
-
-		return true;
-	}
 }
