@@ -342,6 +342,60 @@ class BaseRouterTest extends TestCase {
 		$sut->route($request);
 	}
 
+	public function testRoute_failsWhenAcceptHasNoMatch():void {
+		$uri = self::createMock(Uri::class);
+		$uri->method("getPath")->willReturn("/something");
+		$request = self::createMock(Request::class);
+		$request->method("getUri")->willReturn($uri);
+		$request->method("getMethod")->willReturn("GET");
+		$request->method("getHeaderLine")
+			->with("accept")
+			->willReturn("application/yaml");
+
+		$sut = new class(new RouterConfig(307, "text/html")) extends BaseRouter {
+			/** @noinspection PhpUnused */
+			#[Any(path: "/something", accept: "text/html")]
+			public function thisShouldNotMatch():void {
+				throw new Exception("Route 1");
+			}
+
+			/** @noinspection PhpUnused */
+			#[Any(path: "/something", accept: "application/json")]
+			public function thisShouldMatch():void {
+				throw new Exception("Route 2");
+			}
+		};
+		self::expectException(HttpNotAcceptable::class);
+		$sut->route($request);
+	}
+
+	public function testRoute_usesDefaultContentTypeForLooseAccept():void {
+		$uri = self::createMock(Uri::class);
+		$uri->method("getPath")->willReturn("/something");
+		$request = self::createMock(Request::class);
+		$request->method("getUri")->willReturn($uri);
+		$request->method("getMethod")->willReturn("GET");
+		$request->method("getHeaderLine")
+			->with("accept")
+			->willReturn("text/*");
+
+		$sut = new class(new RouterConfig(307, "text/plain,text/html")) extends BaseRouter {
+			/** @noinspection PhpUnused */
+			#[Any(path: "/something", accept: "text/html")]
+			public function thisShouldNotMatch():void {
+				throw new Exception("Route 1");
+			}
+
+			/** @noinspection PhpUnused */
+			#[Any(path: "/something", accept: "text/plain")]
+			public function thisShouldMatch():void {
+				throw new Exception("Route 2");
+			}
+		};
+		self::expectExceptionMessage("Route 2");
+		$sut->route($request);
+	}
+
 	/** @dataProvider data_redirectCode */
 	public function testHandleRedirects_responseCodeFromConfig(
 		int $code,
