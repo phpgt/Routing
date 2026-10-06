@@ -20,7 +20,7 @@ use GT\Routing\Method\Get;
 use GT\Routing\Method\Post;
 
 /**
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 class RouterCallback {
 	private Container $container;
