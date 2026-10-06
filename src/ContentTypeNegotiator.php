@@ -85,7 +85,7 @@ class ContentTypeNegotiator {
 	}
 
 	private function getDefaultContentType(string $acceptHeader):string {
-		return $this->config?->defaultContentType ?? $acceptHeader;
+		return $this->config->defaultContentType ?? $acceptHeader;
 	}
 
 	private function negotiateDefaultContentType(

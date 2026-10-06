@@ -7,7 +7,7 @@ use Iterator;
 
 /**
  * @implements Iterator<int, string>
- * @SuppressWarnings(PHPMD.TooManyPublicMethods)
+ * @SuppressWarnings("PHPMD.TooManyPublicMethods")
  */
 class Assembly implements Iterator, Countable {
 	const TYPE_LOGIC = "logic";

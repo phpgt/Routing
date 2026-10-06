@@ -16,7 +16,7 @@ use Gt\Http\ResponseStatusException\Redirection\HttpTemporaryRedirect;
 use ReflectionClass;
 
 /**
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @SuppressWarnings("PHPMD.CouplingBetweenObjects")
  */
 abstract class BaseRouter {
 	private ?RouterConfig $config;

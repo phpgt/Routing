@@ -5,7 +5,7 @@ use Exception;
 use SplFileObject;
 
 /**
- * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+ * @SuppressWarnings("PHPMD.CamelCaseMethodName")
  */
 class LogicStreamWrapper {
 	const NAMESPACE_PREFIX = "GT\AppLogic";
