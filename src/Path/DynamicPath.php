@@ -14,89 +14,58 @@ class DynamicPath {
 		$this->assemblyList = $assemblyList;
 	}
 
-	public function get(?string $key = null, bool $extra = false):?string {
-		$requestPathParts = explode("/", $this->requestPath);
+	/**
+	 * With no key, return the deepest dynamic value across all assemblies.
+	 * With a key, select its one-based occurrence, defaulting to the first.
+	 * Return null if the requested occurrence is absent.
+	 * Boolean indices retain the legacy positional extra argument.
+	 */
+	public function get(?string $key = null, int|bool $index = 1, bool $extra = false):?string {
+		if(is_bool($index)) {
+			$extra = $index;
+			$index = 1;
+		}
+		$matches = $this->getMatchingParts($key, $extra);
+		ksort($matches);
+		if(is_null($key)) {
+			return $matches ? end($matches) : null;
+		}
+		return array_values($matches)[$index - 1] ?? null;
+	}
 
+	/** @return array<int, string> */
+	private function getMatchingParts(?string $key, bool $extra):array {
+		$requestPathParts = explode("/", $this->requestPath);
+		$matches = [];
 		foreach($this->assemblyList as $assembly) {
 			foreach($assembly as $filePath) {
-				$filePathParts = explode("/", $filePath);
-
-				foreach($filePathParts as $i => $f) {
-					$f = strtok($f, ".");
-					if($f[0] !== "@") {
+				foreach(explode("/", $filePath) as $i => $part) {
+					$placeholder = explode(".", $part)[0];
+					if(!str_starts_with($placeholder, "@")) {
 						continue;
 					}
-
-					if(is_null($key)) {
-						return $this->handleNullKey(
-							$filePathParts,
-							$requestPathParts,
-							$extra,
-						);
+					if(!is_null($key) && ltrim($placeholder, "@") !== $key) {
+						continue;
 					}
-
-					if($this->matchesKey($f, $key)) {
-						$matchedKey = $this->getMatchedKey(
-							$requestPathParts,
-							$i,
-						);
-						if(!$matchedKey) {
-							continue;
-						}
-						return $matchedKey;
+					$value = $this->getPartValue($requestPathParts, $i, $placeholder, $extra);
+					if(!is_null($value)) {
+						$matches[$i] = $value;
 					}
 				}
 			}
 		}
-
-		return null;
-	}
-
-	/**
-	 * @param array<string> $filePathParts
-	 * @param array<string> $requestPathParts
-	 */
-	private function handleNullKey(
-		array $filePathParts,
-		array $requestPathParts,
-		bool $extra,
-	):?string {
-		if($extra) {
-			return $this->getExtraPath($filePathParts, $requestPathParts);
-		}
-
-		return $requestPathParts[count($filePathParts) - 1] ?? null;
-	}
-
-	/**
-	 * @param array<string> $filePathParts
-	 * @param array<string> $requestPathParts
-	 */
-	private function getExtraPath(
-		array $filePathParts,
-		array $requestPathParts,
-	):string {
-		$test = "";
-		for($ppi = count($filePathParts), $len = count($requestPathParts); $ppi < $len; $ppi++) {
-			$test .= $requestPathParts[$ppi] . "/";
-		}
-		return rtrim($test, "/");
-	}
-
-	private function matchesKey(string $placeholder, string $key):bool {
-		return ltrim($placeholder, "@") === $key;
+		return $matches;
 	}
 
 	/** @param array<string> $requestPathParts */
-	private function getMatchedKey(
-		array $requestPathParts,
-		int $index,
-	):?string {
-		$matchedKey = $requestPathParts[$index] ?? null;
-		if(!$matchedKey) {
-			return null;
+	private function getPartValue(array $requestPathParts, int $index, string $placeholder, bool $extra):?string {
+		if($extra) {
+			return str_starts_with($placeholder, "@@")
+				? rtrim(implode("/", array_slice($requestPathParts, $index + 1)), "/")
+				: null;
 		}
-		return $matchedKey;
+		$value = $requestPathParts[$index] ?? "";
+		return $value === "" ? null : $value;
 	}
 
 	public function getUrl(string $viewBasePath):string {
