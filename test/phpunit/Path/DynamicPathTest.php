@@ -6,6 +6,37 @@ use GT\Routing\Path\DynamicPath;
 use PHPUnit\Framework\TestCase;
 
 class DynamicPathTest extends TestCase {
+	public function testGet_deepestRepeatedKey():void {
+		$assembly = new Assembly();
+		$assembly->add("page/groups/@slug/_common.php");
+		$assembly->add("page/groups/@slug/events/@slug/index.php");
+		$sut = new DynamicPath("/groups/my-group/events/my-event", $assembly);
+		self::assertSame("my-event", $sut->get());
+	}
+
+	public function testGet_deepestDistinctKeyAcrossAssemblies():void {
+		$view = new Assembly();
+		$view->add("page/groups/@group/index.html");
+		$logic = new Assembly();
+		$logic->add("page/groups/@group/events/@event/index.php");
+		$sut = new DynamicPath("/groups/my-group/events/my-event", $view, $logic);
+		self::assertSame("my-event", $sut->get());
+	}
+
+	public function testGet_repeatedKeyOccurrence():void {
+		$view = new Assembly();
+		$view->add("page/groups/@slug/_header.html");
+		$view->add("page/groups/@slug/events/@slug/index.html");
+		$logic = new Assembly();
+		$logic->add("page/groups/@slug/events/@slug/index.php");
+		$sut = new DynamicPath("/groups/my-group/events/my-event", $view, $logic);
+		self::assertSame("my-group", $sut->get("slug"));
+		self::assertSame("my-group", $sut->get("slug", 1));
+		self::assertSame("my-event", $sut->get("slug", 2));
+		self::assertNull($sut->get("slug", 3));
+		self::assertNull($sut->get("slug", 0));
+	}
+
 	public function testGet_noAssembly():void {
 		$sut = new DynamicPath("/");
 		self::assertNull($sut->get("something"));
